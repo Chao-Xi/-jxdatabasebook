@@ -10,9 +10,9 @@ plugins:
 nav:
   - 'Welcome': "index.md"
   - 'AWS Aurora 技术与实战教程':
-    - '第一节 ElasticSearch 概述' : 'chap1/1Es_intro.md'
-    - '第二节 揭秘 Aurora 底层存储' : 'chap1/2Aurora_Adv.md'
-    - '第三节 Aurora Basic Operation' : 'chap1/3Aurora_operation.md'
+    - '第一节 ElasticSearch 概述' : 'aurora/1Es_intro.md'
+    - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
+    - '第三节 Aurora Basic Operation' : 'aurora/3Aurora_operation.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
