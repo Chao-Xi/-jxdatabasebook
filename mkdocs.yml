@@ -10,7 +10,7 @@ plugins:
 nav:
   - 'Welcome': "index.md"
   - 'AWS Aurora 技术与实战教程':
-    - '第一节 ElasticSearch 概述' : 'aurora/1Intital_Explore.md'
+    - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
     - '第三节 Aurora Basic Operation' : 'aurora/3Aurora_operation.md'
   - 'Extra 知识扩展':
