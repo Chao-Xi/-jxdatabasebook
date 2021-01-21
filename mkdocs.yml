@@ -9,6 +9,11 @@ plugins:
 
 nav:
   - 'Welcome': "index.md"
+  - 'MySQL 基础篇':
+    - '第一节 基础架构：执行一条SQL查询语句' : 'chap1/1mysql_exec.md'
+    - '第二节 日志系统：执行一条SQL更新语句' : 'chap1/2mysql_logs.md'
+    - '第三节 事务隔离' : 'chap1/3mysql_isolaion.md'
+    - '第四节 深入浅出索引' : 'chap1/4mysql_index.md'
   - 'AWS Aurora 技术与实战教程':
     - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'

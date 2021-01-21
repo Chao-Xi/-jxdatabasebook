@@ -11,6 +11,8 @@ docs            mkdocs.yml
 $  git init
 Initialized empty Git repository in /Users/../Devops_sap/Tech_Books/jxdatabasebook/.git/
 
+￥ git remote add origin https://github.com/Chao-Xi/jxdatabasebook.git
+
 $  mkdocs gh-deploy --clean
 INFO    -  Cleaning site directory 
 INFO    -  Building documentation to directory: /Users/.../Devops_sap/Tech_Books/jxdatabasebook/site 
