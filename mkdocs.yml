@@ -20,6 +20,8 @@ nav:
     - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
     - '第三节 Aurora Basic Operation' : 'aurora/3Aurora_operation.md'
+  - 'MySQL on K8S':
+    - '第一节 Kubernetes 部署 MySQL 主从服务': 'chap_k8s/1Mysql_k8s.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
