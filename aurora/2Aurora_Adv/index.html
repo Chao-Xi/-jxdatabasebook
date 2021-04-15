@@ -1,0 +1,1259 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
+    
+    
+      
+        <title>第二节 揭秘 Aurora 底层存储 - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.9299cb39.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#ef5552">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aurora" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第二节 揭秘 Aurora 底层存储
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/Chao-Xi/jxdatabasebook.git/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/Chao-Xi/jxdatabasebook.git/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      <label class="md-nav__link" for="__nav_2">
+        MySQL 基础篇
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="MySQL 基础篇" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      <label class="md-nav__link" for="__nav_3">
+        AWS Aurora 技术与实战教程
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="AWS Aurora 技术与实战教程" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          第二节 揭秘 Aurora 底层存储
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    1、快速回顾： 数据库内部结构
+  </a>
+  
+    <nav class="md-nav" aria-label="1、快速回顾： 数据库内部结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-1-b" class="md-nav__link">
+    1-1 数据库B+树
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-2-do-redo-undo" class="md-nav__link">
+    1-2 快速回顾：DO-REDO-UNDO协议
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-3" class="md-nav__link">
+    1-3 快速回顾：崩溃恢复
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-4-io" class="md-nav__link">
+    1-4 快速回顾：持久化所需的IO
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#io" class="md-nav__link">
+    传统数据库的目的就是减少IO
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    2、原生数据库的架构
+  </a>
+  
+    <nav class="md-nav" aria-label="2、原生数据库的架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2-1-amazon-aurora" class="md-nav__link">
+    2-1 Amazon Aurora的方式日志即数据库
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-2-amazon-aurora" class="md-nav__link">
+    2-2 Amazon Aurora的方式：将险查点工作下放到存储层
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-3-amazon-aurora" class="md-nav__link">
+    2-3 Amazon Aurora的方式：计算与存储分离
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-4-amazon-aurora" class="md-nav__link">
+    2-4 Amazon Aurora使用面向服务的体系结构
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-5-amazon-aurora-io" class="md-nav__link">
+    2-5 Amazon Aurora 存储节点I/O流
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    3、大规模的持久性
+  </a>
+  
+    <nav class="md-nav" aria-label="3、大规模的持久性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-1-auroraaz1" class="md-nav__link">
+    3-1 Aurora可以容忍AZ+1故障
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-2-amazon-aurora" class="md-nav__link">
+    3-2 Amazon Aurora使用段存储
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3" class="md-nav__link">
+    3-3 快速和可逆的成语变化
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    4、性能
+  </a>
+  
+    <nav class="md-nav" aria-label="4、性能">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-amazon-aurora-io" class="md-nav__link">
+    4-1 Amazon Aurora I/O概况
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    5、全局数据库
+  </a>
+  
+    <nav class="md-nav" aria-label="5、全局数据库">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5-1" class="md-nav__link">
+    5-1 全局物理复制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-2" class="md-nav__link">
+    5-2 全局复制性能
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    6、快速数据库克隆
+  </a>
+  
+    <nav class="md-nav" aria-label="6、快速数据库克隆">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1-aurora" class="md-nav__link">
+    6-1 Aurora数据库克隆技术
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2" class="md-nav__link">
+    6-2 数据库克隆：怎么工作的？
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        MySQL on K8S
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="MySQL on K8S" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Extra 知识扩展
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Extra 知识扩展" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    1、快速回顾： 数据库内部结构
+  </a>
+  
+    <nav class="md-nav" aria-label="1、快速回顾： 数据库内部结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-1-b" class="md-nav__link">
+    1-1 数据库B+树
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-2-do-redo-undo" class="md-nav__link">
+    1-2 快速回顾：DO-REDO-UNDO协议
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-3" class="md-nav__link">
+    1-3 快速回顾：崩溃恢复
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-4-io" class="md-nav__link">
+    1-4 快速回顾：持久化所需的IO
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#io" class="md-nav__link">
+    传统数据库的目的就是减少IO
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    2、原生数据库的架构
+  </a>
+  
+    <nav class="md-nav" aria-label="2、原生数据库的架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2-1-amazon-aurora" class="md-nav__link">
+    2-1 Amazon Aurora的方式日志即数据库
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-2-amazon-aurora" class="md-nav__link">
+    2-2 Amazon Aurora的方式：将险查点工作下放到存储层
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-3-amazon-aurora" class="md-nav__link">
+    2-3 Amazon Aurora的方式：计算与存储分离
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-4-amazon-aurora" class="md-nav__link">
+    2-4 Amazon Aurora使用面向服务的体系结构
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-5-amazon-aurora-io" class="md-nav__link">
+    2-5 Amazon Aurora 存储节点I/O流
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    3、大规模的持久性
+  </a>
+  
+    <nav class="md-nav" aria-label="3、大规模的持久性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-1-auroraaz1" class="md-nav__link">
+    3-1 Aurora可以容忍AZ+1故障
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-2-amazon-aurora" class="md-nav__link">
+    3-2 Amazon Aurora使用段存储
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3" class="md-nav__link">
+    3-3 快速和可逆的成语变化
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    4、性能
+  </a>
+  
+    <nav class="md-nav" aria-label="4、性能">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-amazon-aurora-io" class="md-nav__link">
+    4-1 Amazon Aurora I/O概况
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    5、全局数据库
+  </a>
+  
+    <nav class="md-nav" aria-label="5、全局数据库">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5-1" class="md-nav__link">
+    5-1 全局物理复制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-2" class="md-nav__link">
+    5-2 全局复制性能
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    6、快速数据库克隆
+  </a>
+  
+    <nav class="md-nav" aria-label="6、快速数据库克隆">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1-aurora" class="md-nav__link">
+    6-1 Aurora数据库克隆技术
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2" class="md-nav__link">
+    6-2 数据库克隆：怎么工作的？
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/Chao-Xi/jxdatabasebook.git/edit/master/docs/aurora/2Aurora_Adv.md" title="编辑此页" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="aurora"><strong>第二节 揭秘 Aurora 底层存储</strong></h1>
+<h2 id="1"><strong>1、快速回顾： 数据库内部结构</strong></h2>
+<h3 id="1-1-b"><strong>1-1 数据库B+树</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_1.png" title="Body image" /></p>
+<ul>
+<li>数据库B+树，根节点， 中间点， 叶子节点，数据放在叶子节点</li>
+<li><strong>数据在内存中以固定大小譬如16KB的“页面” 存储（aka "buffer-pool")</strong> </li>
+<li>内存的数据从成本的考虑和高可用的考虑不会长久的存放，<strong>数据会被定期写入持久的存储中去（checkpoint)</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua2_2.png" title="Body image" /></p>
+<h3 id="1-2-do-redo-undo"><strong>1-2 快速回顾：DO-REDO-UNDO协议</strong></h3>
+<ul>
+<li>数据在buffer-pool中通过Do/REDO/UNDO操作在“原位‘’修改 </li>
+<li>包含前像/后像的日志记录被存储到<code>write-ahead Log (WAL)</code></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua2_3.png" title="Body image" /></p>
+<ul>
+<li>REDO: 重放操作，包含前像/后像，变更的东西</li>
+<li>UNDO：反过来，变更错了，回滚操作</li>
+</ul>
+<h3 id="1-3"><strong>1-3 快速回顾：崩溃恢复</strong></h3>
+<ul>
+<li>事务1： 提交做了checkpoint, 日志有，数据脏块落盘</li>
+<li>事务2，事务3写了REDO，没有做checkpoint</li>
+<li>事务4没做完，系统崩溃了</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua2_4.png" title="Body image" /></p>
+<ul>
+<li>REDO LOG重放，从checkpoint 重放, 事务1不用重放</li>
+<li>事务2，事务3通过REDO重放</li>
+<li>事务4没有提交，所以要通过UNDO回滚</li>
+</ul>
+<h3 id="1-4-io"><strong>1-4 快速回顾：持久化所需的IO</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_5.png" title="Body image" /></p>
+<ul>
+<li>用户数据变化的大远远小于I/O大小（32KB+) </li>
+<li><strong>数据库的一切都与I/O相关</strong></li>
+</ul>
+<p><strong>传统的数据库不是每个checkpoint都去写，效率太低了，隔一段时间写一下，多个事务并发劲量合并的</strong></p>
+<h3 id="io"><strong>传统数据库的目的就是减少IO</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_6.png" title="Body image" /></p>
+<ul>
+<li>缓存/查询优化/ 硬件方面提高IO带宽</li>
+</ul>
+<h2 id="2"><strong>2、原生数据库的架构</strong></h2>
+<h3 id="2-1-amazon-aurora"><strong>2-1 Amazon Aurora的方式日志即数据库</strong></h3>
+<p>从数据库创建开始的日志流 </p>
+<p><img alt="Alt Image Text" src="../../images/aua2_7.png" title="Body image" /></p>
+<ul>
+<li>任何版本的数据库页面都可以通过日志流构造 </li>
+<li>绿色页面 t5 可以通过 t1 到 t5 的日志来生成 </li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua2_8.png" title="Body image" /></p>
+<h3 id="2-2-amazon-aurora"><strong>2-2 Amazon Aurora的方式：将险查点工作下放到存储层</strong></h3>
+<p><strong>问题1:</strong></p>
+<p>仅仅依靠日志流来应付读取页面不实际（太慢） ，</p>
+<p><em>建库刚开始可以，构建两年后的数据库的REDO log不现实</em></p>
+<p><strong>解决办法：</strong></p>
+<p>使用定期检查点</p>
+<p><strong>问题2:</strong> </p>
+<p>检查点任务是数据库的重大负荷，感觉和传统没有区别</p>
+<p><strong>解决办法：</strong></p>
+<ul>
+<li>使用分布式存储做持续的检查点 </li>
+<li>上千个节点在周期性，异步的做checkpoint</li>
+</ul>
+<h3 id="2-3-amazon-aurora"><strong>2-3 Amazon Aurora的方式：计算与存储分离</strong></h3>
+<p><strong>计算与存储有不同的生命周期</strong> </p>
+<p>计算实例 </p>
+<ul>
+<li>损坏后被替换</li>
+<li>停机节省费用</li>
+<li>基于负载扩展、收缩 </li>
+</ul>
+<p><strong>存储，从另一个角度来说，是长期的</strong></p>
+<p><strong>为可伸缩性、可用性和持久性解藕计算和存储</strong> </p>
+<h3 id="2-4-amazon-aurora"><strong>2-4 Amazon Aurora使用面向服务的体系结构</strong></h3>
+<p>专门构建一个多租户，多附加的专门为数据库打造的日志结构分 布式存储系统 </p>
+<p><strong>多租户</strong></p>
+<p><em>不是为每一个数据库用户就构建一个存储节点</em></p>
+<p><strong>多附加</strong></p>
+<p>集群中的写节点读节点，其实是share disk,存储结构要同时挂到这些节点上</p>
+<p><img alt="Alt Image Text" src="../../images/aua2_9.png" title="Body image" /></p>
+<p><strong>利用AWS 现有服务</strong></p>
+<ul>
+<li>DynamoDB(Key-Value): 存储原数据metadata, exp, 存储节点的数据分部，软件的情况</li>
+<li>Route53: DNS的变化</li>
+<li>EC2</li>
+<li>S3 备份</li>
+</ul>
+<h3 id="2-5-amazon-aurora-io"><strong>2-5 Amazon Aurora 存储节点I/O流</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_10.png" title="Body image" /></p>
+<ol>
+<li>（写入日志发到存储节点）接收日志记录放入内存队列并持久化 <ul>
+<li>同时写入6个，4个成功及表现为成功</li>
+</ul>
+</li>
+<li>通知数据库</li>
+<li>组织日志并确认间隙 (写入的日志被组织，并查看是否有间隙) </li>
+<li>通过Gossip到peers补足间隙 <ul>
+<li>通过gossip 到其他peer节点把日志拉出来，补足间隙</li>
+</ul>
+</li>
+<li>合并日志记录形成新的页面 <ul>
+<li>补足间隙后，旧页面和日志合成新的页面定期</li>
+</ul>
+</li>
+<li>定期将日志和合并后的page放到s3 （被以后的查询，恢复利用）</li>
+<li>定期垃圾回收，清理旧页面 （当主节点和只读节点都不在需要，被回收）</li>
+<li>定期检查页面一致性 （checksum) 如果缺失，去其他节点去要</li>
+</ol>
+<p><strong>注意：</strong> </p>
+<ul>
+<li>所有步骤都是异步的 （除了1，2步）</li>
+<li>只有第一步和第二步会造成前端延迟 </li>
+</ul>
+<h2 id="3"><strong>3、大规模的持久性</strong></h2>
+<h3 id="3-1-auroraaz1"><strong>3-1 Aurora可以容忍AZ+1故障</strong></h3>
+<ul>
+<li>
+<p>复制6份，每个AZ有2份 </p>
+<ul>
+<li>形成quorum，要求6写4成功 </li>
+</ul>
+</li>
+<li>
+<p>如果面临AZ故障？ </p>
+<ul>
+<li><strong>依然可以保证4/6拷贝</strong> </li>
+<li>保持可写</li>
+</ul>
+</li>
+<li>
+<p>如果面临AZ+1故障呢？ </p>
+<ul>
+<li>依然有3份拷贝 </li>
+<li>不会有数据丢失</li>
+<li>通过幸存的3拷贝恢复损坏的拷贝 </li>
+<li>恢复写能的力 </li>
+</ul>
+</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua2_11.png" title="Body image" /></p>
+<h3 id="3-2-amazon-aurora"><strong>3-2 Amazon Aurora使用段存储</strong></h3>
+<ul>
+<li>
+<p>将数据分成n个固定大小的段 </p>
+<ul>
+<li><strong>在一个protection group (PG）中对每个段复制6份</strong> </li>
+</ul>
+</li>
+<li>
+<p>在故障率以及修复时间之间平衡 </p>
+<ul>
+<li>如果段太小，故障率过高</li>
+<li>如果段太大，则修复时间过长 </li>
+</ul>
+</li>
+<li>
+<p>选择在保证“足够快”修复的前提下的最大大小 ．</p>
+<ul>
+<li><strong>我们现在段大小是是10GB，因为我们可以在1分钟以内修复一个10G的段</strong></li>
+</ul>
+</li>
+</ul>
+<h3 id="3-3"><strong>3-3 快速和可逆的成语变化</strong></h3>
+<ul>
+<li>使用 quorum sets 与epochs 来 <ul>
+<li><strong>通过epoch实现快速更改</strong> </li>
+<li><strong>在成员变化时创建额外的的quorums</strong> </li>
+<li><strong>用多个quorum来快速逆转更改</strong> </li>
+</ul>
+</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua2_12.png" title="Body image" /></p>
+<ul>
+<li>F 可疑： 网络的堵塞</li>
+<li>两个Epoch都可以满足4/6写入成功</li>
+<li>新的quorum起来以后，从其他节点拷贝数据</li>
+<li>确实有问题，更新epochs，保证只写入quorum  G就好了</li>
+</ul>
+<p>一边修复一边观察</p>
+<h2 id="4"><strong>4、性能</strong></h2>
+<h3 id="4-1-amazon-aurora-io"><strong>4-1 Amazon Aurora I/O概况</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_13.png" title="Body image" /></p>
+<h2 id="5"><strong>5、全局数据库</strong></h2>
+<h3 id="5-1"><strong>5-1 全局物理复制</strong></h3>
+<p><strong>传统的数据库复制都是通过binlog,延迟比较长</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua2_14.png" title="Body image" /></p>
+<ol>
+<li>主实例将日志记录用于发送倒存储节点，只读实例和<strong>复制服务器</strong></li>
+<li>复制服务器将日志流发送到secondary region 的复制代理</li>
+<li>复制服务器将日志并行发送给存储节点和只读副本</li>
+<li>
+<p><strong>复制服务器可以从存储节点拉日志记录以弥补故障造成的间隙</strong></p>
+</li>
+<li>
+<p><strong>高吞吐</strong>： 150K writes/second的负载，复制对性能的影响也是微乎其微</p>
+</li>
+<li><strong>低复制延迟：高负载下依然保持次秒级跨区域复制延迟</strong></li>
+<li><strong>快速恢复：区域故障后1分钟以内即可承担全面读写</strong></li>
+</ol>
+<h3 id="5-2"><strong>5-2 全局复制性能</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_15.png" title="Body image" /></p>
+<p>QPS对LAG的影响</p>
+<h2 id="6"><strong>6、快速数据库克隆</strong></h2>
+<h3 id="6-1-aurora"><strong>6-1 Aurora数据库克隆技术</strong></h3>
+<p>克隆数据库而不复制数据 =&gt; 可以很快创建一个clone</p>
+<p><img alt="Alt Image Text" src="../../images/aua1_30.png" title="Body image" /></p>
+<ul>
+<li>瞬间创建一个数据库克隆<ul>
+<li><strong>快的原因是并不会拷贝原数据库中的数据吗，而只是很快速的生成指针</strong> </li>
+<li>克隆数据库并不包含数据，而是包含一堆指针。当用户访问原数据库是是通过指针去访问原数据库中的数据</li>
+<li>当源数据库发生改变时，源数据里的数据保留不变，<strong>被修改的数据块拷贝一份出来，在拷贝出来的数据快做修改</strong></li>
+<li><strong>对于克隆数据来说，始终可以看到创建克隆数据库时源数据快中的内容</strong> 比如9点创建的克隆，可以看到静态的九点钟创建的克隆的内容</li>
+<li>源库的变化不会影响源数据文件，是会拷贝一个新的数据块</li>
+<li>对克隆库修改时，也是对源数据进行拷贝，进行修改</li>
+</ul>
+</li>
+<li>仅在发生写入时复制数据(COW) – 当原始数据和克隆卷数据不同时</li>
+</ul>
+<p><strong>应用场景</strong></p>
+<ul>
+<li>克隆生产数据库以运行测试</li>
+<li>数据库重组</li>
+<li>为分析提供一个时间点快照，不影响生产环境，可以产生一个用于分析的静态内容</li>
+</ul>
+<h3 id="6-2"><strong>6-2 数据库克隆：怎么工作的？</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua2_16.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua2_17.png" title="Body image" /></p>
+<p><strong>完全不需要深度复制</strong></p>
+<ul>
+<li>速度快</li>
+<li>节省空间和成本</li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../1Intital_Explore/" class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              第一节 深入了解 Aurora 数据库
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../3Aurora_operation/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              第三节 Aurora Basic Operation
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2021-9999 Jacob Xi
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.7353b375.min.js"></script>
+      
+    
+  </body>
+</html>

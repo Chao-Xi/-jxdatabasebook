@@ -1,0 +1,889 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.1">
+    
+    
+      
+        <title>第一节 基础架构：执行一条SQL查询语句 - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.9299cb39.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ef6f36e2.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#ef5552">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#sql" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第一节 基础架构：执行一条SQL查询语句
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/Chao-Xi/jxdatabasebook.git/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/Chao-Xi/jxdatabasebook.git/" title="前往 GitHub 仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      <label class="md-nav__link" for="__nav_2">
+        MySQL 基础篇
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="MySQL 基础篇" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          第一节 基础架构：执行一条SQL查询语句
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    1、连接器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    2、查询缓存
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    3、分析器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    4、优化器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    5、执行器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    6、小节总结
+  </a>
+  
+    <nav class="md-nav" aria-label="6、小节总结">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1" class="md-nav__link">
+    6-1 提问
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      <label class="md-nav__link" for="__nav_3">
+        AWS Aurora 技术与实战教程
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="AWS Aurora 技术与实战教程" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      <label class="md-nav__link" for="__nav_4">
+        MySQL on K8S
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="MySQL on K8S" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      <label class="md-nav__link" for="__nav_5">
+        Extra 知识扩展
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+      <nav class="md-nav" aria-label="Extra 知识扩展" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    1、连接器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    2、查询缓存
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    3、分析器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    4、优化器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    5、执行器
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    6、小节总结
+  </a>
+  
+    <nav class="md-nav" aria-label="6、小节总结">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1" class="md-nav__link">
+    6-1 提问
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/Chao-Xi/jxdatabasebook.git/edit/master/docs/chap1/1mysql_exec.md" title="编辑此页" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="sql"><strong>第一节 基础架构：执行一条SQL查询语句</strong></h1>
+<p>平时我们使用数据库，看到的通常都是一个整体。比如，你有个最简单的表，表里只有一个 ID 字段，在执行下面这个查询语句时：</p>
+<pre><code>mysql&gt; select * from T where ID=10；
+</code></pre>
+<p>下面是 MySQL 的基本架构示意图，可以看到 SQL 语句在 MySQL 的各个功能模块中的执行过程。</p>
+<p><img alt="Alt Image Text" src="../../images/chap1_1.png" title="Body image" /></p>
+<blockquote>
+<p>MySQL 的逻辑架构图</p>
+</blockquote>
+<p>MySQL 可以分为 <strong>Server 层和存储引擎层</strong>两部分。</p>
+<p>Server 层包括连接器、查询缓存、分析器、优化器、执行器等，涵盖 MySQL 的大多数核心服务功能，以及所有的内置函数（如日期、时间、数学和加密函数等），<strong>所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图等。</strong></p>
+<p><strong>存储引擎层负责数据的存储和提取。</strong></p>
+<p>其架构模式是插件式的，支持 InnoDB、MyISAM、Memory 等多个存储引擎。</p>
+<p>现在最常用的存储引擎是 InnoDB，它从 MySQL 5.5.5 版本开始成为了默认存储引擎。</p>
+<ul>
+<li>执行 create table 建表的时候，如果不指定引擎类型，默认使用的就是 InnoDB。</li>
+<li>也可以通过指定存储引擎的类型来选择别的引擎，比如在 create table 语句中使用 engine=memory, 来指定使用内存引擎创建表。</li>
+</ul>
+<p><strong>不同的存储引擎共用一个 Server 层，也就是从连接器到执行器的部分</strong></p>
+<h2 id="1"><strong>1、连接器</strong></h2>
+<p>第一步，<strong>连接器负责跟客户端建立连接、获取权限、维持和管理连接</strong>。</p>
+<pre><code>mysql -h $ip -P $port -u $user -p
+</code></pre>
+<p>连接命令中的 mysql 是客户端工具，用来跟服务端建立连接。在完成经典的 TCP 握手后，连接器就要开始认证你的身份，这个时候用的就是你输入的用户名和密码。</p>
+<ul>
+<li>如果用户名或密码不对，你就会收到一个"Access denied for user"的错误，然后客户端程序结束执行。</li>
+<li>如果用户名密码认证通过，连接器会到权限表里面查出你拥有的权限。之后，这个连接里面的权限判断逻辑，都将依赖于此时读到的权限。</li>
+</ul>
+<p>这就意味着，一个用户成功建立连接后，即使你用管理员账号对这个用户的权限做了修改，也不会影响已经存在连接的权限。</p>
+<p><strong>修改完成后，只有再新建的连接才会使用新的权限设置。</strong></p>
+<p>连接完成后，<strong>如果你没有后续的动作，这个连接就处于空闲状态</strong>，你可以在 <code>show processlist</code> 命令中看到它。</p>
+<pre><code>show processlist;
+</code></pre>
+<p>文本中这个图是 <code>show processlist</code> 的结果，其中的 <code>Command</code> 列显示为<code>“Sleep”</code> 的这一行，就表示现在系统里面有一个空闲连接。</p>
+<p><img alt="Alt Image Text" src="../../images/chap1_2.png" title="Body image" /></p>
+<ul>
+<li>客户端如果太长时间没动静，连接器就会自动将它断开。</li>
+<li>这个时间是由参数 <code>wait_timeout</code> 控制的，默认值是 8 小时。</li>
+</ul>
+<pre><code>mysql&gt; show variables like 'wait_timeout';
+</code></pre>
+<ul>
+<li>如果在连接被断开之后，客户端再次发送请求的话，就会收到一个错误提醒： Lost connection to MySQL server during query。这时候如果你要继续，就需要重连，然后再执行请求了。</li>
+</ul>
+<p><strong>长短链接</strong></p>
+<ul>
+<li>数据库里面，长连接是指连接成功后，如果客户端持续有请求，则一直使用同一个连接。</li>
+<li><strong>短连接则是指每次执行完很少的几次查询就断开连接，下次查询再重新建立一个</strong>。</li>
+<li><strong>使用中要尽量减少建立连接的动作，也就是尽量使用长连接。</strong></li>
+</ul>
+<blockquote>
+<p>数据库连接是高cost 的，大部分并发业务影建议不要使用短链接</p>
+</blockquote>
+<p>但是全部使用长连接后，你可能会发现，有些时候 MySQL 占用内存涨得特别快，<strong>这是因为 MySQL 在执行过程中临时使用的内存是管理在连接对象里面的</strong>。<strong>这些资源会在连接断开的时候才释放。</strong></p>
+<p>所以如果长连接累积下来，可能导致内存占用太大，被系统强行杀掉（OOM），从现象看就是 MySQL 异常重启了。</p>
+<blockquote>
+<p>mysql执行中一些数据绑定在连接对象中，因为长连接长时间不断开导致内存占用太多。可以使用定时超时断开，或通过重新初始化链接来清空。</p>
+</blockquote>
+<p><strong>两种方案:</strong></p>
+<ol>
+<li>定期断开长连接。使用一段时间，或者程序里面判断执行过一个占用内存的大查询后，断开连接，之后要查询再重连。(<strong>定期断开链接</strong>)</li>
+<li>如果你用的是 MySQL 5.7 或更新版本，可以在每次执行一个比较大的操作后，通过执行 <code>mysql_reset_connection</code>  来重新初始化连接资源。<strong>这个过程不需要重连和重新做权限验证，但是会将连接恢复到刚刚创建完时的状态。</strong></li>
+</ol>
+<h2 id="2"><strong>2、查询缓存</strong></h2>
+<p>连接建立完成后，你就可以执行 select 语句了。<strong>执行逻辑就会来到第二步：查询缓存</strong>。</p>
+<ul>
+<li>MySQL 拿到一个查询请求后，会先到查询缓存看看，之前是不是执行过这条语句</li>
+<li>之前执行过的语句及其结果可能会以 <strong><code>key-value</code> 对的形式，被直接缓存在内存中</strong> <ul>
+<li>key 是查询的语句，value 是查询的结果</li>
+<li>如果你的查询能够直接在这个缓存中找到 key，那么这个 value 就会被直接返回给客户端。</li>
+</ul>
+</li>
+</ul>
+<blockquote>
+<p>8.0 已经没有查询缓存的机制了</p>
+</blockquote>
+<p>如果语句不在查询缓存中，就会继续后面的执行阶段。执行完成后，执行结果会被存入查询缓存中。</p>
+<p>如果查询命中缓存，MySQL 不需要执行后面的复杂操作，就可以直接返回结果，这个效率会很高。</p>
+<p><strong><span style="color:red">但是大多数情况下我会建议你不要使用查询缓存，为什么呢？因为查询缓存往往弊大于利。</span></strong></p>
+<ul>
+<li>缓存需要语句完全相等，包括参数</li>
+<li>表更新后就会失效 因此，只有在表更新频率不高，查询语句完全一致的情况下，可以手动开启缓存，其他一律关闭。</li>
+<li>mysql8之后，取消了缓存功能。</li>
+</ul>
+<p>查询缓存的失效非常频繁，只要有对一个表的更新，这个表上所有的查询缓存都会被清空,对于更新压力大的数据库来说，查询缓存的命中率会非常低。除非你的业务就是有一张静态表，很长时间才会更新一次。比如，一个系统配置表，那这张表上的查询才适合使用查询缓存。</p>
+<p>好在 MySQL 也提供了这种“按需使用”的方式。</p>
+<ul>
+<li>你可以将参数 <code>query_cache_type</code> 设置成 <code>DEMAND</code>，这样对于默认的 <code>SQL</code> 语句都不使用查询缓存。</li>
+<li>而对于你确定要使用查询缓存的语句，可以用 <code>SQL_CACHE</code> 显式指定，像下面这个语句一样：</li>
+</ul>
+<pre><code>
+mysql&gt; select SQL_CACHE * from T where ID=10；
+</code></pre>
+<h2 id="3"><strong>3、分析器</strong></h2>
+<p>如果没有命中查询缓存，就要开始真正执行语句了。<strong>首先，MySQL 需要知道你要做什么，因此需要对 SQL 语句做解析。</strong></p>
+<p>分析器先会做“词法分析”。你输入的是由多个字符串和空格组成的一条 SQL 语句，MySQL 需要识别出里面的字符串分别是什么，代表什么。</p>
+<p><code>MySQL</code> 从你输入的"select"这个关键字识别出来，这是一个查询语句。</p>
+<p>它也要把字符串“T”识别成“表名 T”，把字符串“ID”识别成“列 ID”。</p>
+<ul>
+<li><strong>解析语句，生成解析树</strong> </li>
+<li><strong>检查语句中的关键词，表，字段是否存在</strong></li>
+</ul>
+<p>如果你的语句不对，就会收到<code>“You have an error in your SQL syntax”</code>的错误提醒，比如下面这个语句 select 少打了开头的字母“s”。</p>
+<pre><code>mysql&gt; elect * from t where ID=1;
+
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'elect * from t where ID=1' at line 1
+</code></pre>
+<p><strong><code>use near 'elect * from t where ID=1' at line 1</code></strong></p>
+<p>一般语法错误会提示第一个出现错误的位置，所以你要关注的是紧接“use near”的内容。</p>
+<h2 id="4"><strong>4、优化器</strong></h2>
+<p>经过了分析器，MySQL 就知道你要做什么了。在开始执行之前，还要先经过优化器的处理。</p>
+<ul>
+<li>优化器是在表里面有多个索引的时候，决定使用哪个索引；</li>
+<li>或者在一个语句有多表关联（join）的时候，决定各个表的连接顺序。</li>
+</ul>
+<blockquote>
+<p>尽可能扫描少的数据库行纪录</p>
+</blockquote>
+<pre><code>mysql&gt; select * from t1 join t2 using(ID)  where t1.c=10 and t2.d=20;
+</code></pre>
+<ul>
+<li>既可以先从表 t1 里面取出 c=10 的记录的 ID 值，再根据 ID 值关联到表 t2，再判断 t2 里面 d 的值是否等于 20。</li>
+<li>也可以先从表 t2 里面取出 d=20 的记录的 ID 值，再根据 ID 值关联到 t1，再判断 t1 里面 c 的值是否等于 10。</li>
+</ul>
+<p><strong><span style="color:red">这两种执行方法的逻辑结果是一样的，但是执行的效率会有不同，而优化器的作用就是决定选择使用哪一个方案。</span></strong></p>
+<h2 id="5"><strong>5、执行器</strong></h2>
+<p>Mysql执行的流程包括分析器阶段的词法分析和语法分析，优化器阶段的索引和连接顺序优化，最后由执行器开始执行。 </p>
+<ul>
+<li>分析器解释出你要做什么；</li>
+<li>优化器解释出你需要该怎么做； </li>
+<li>执行器负责执行。</li>
+</ul>
+<p>开始执行的时候，要先判断一下你对这个表 T 有没有执行查询的权限，如果没有，就会返回没有权限的错误，<strong>如下所示 (在工程实现上，如果命中查询缓存，会在查询缓存返回结果的时候，做权限验证。查询也会在优化器之前调用 precheck 验证权限)。</strong></p>
+<p><strong>权限验证不仅仅在执行器这部分会做，在分析器之后</strong>，也就是知道了该语句要“干什么”之后，也会先做一次权限验证。叫做precheck。而precheck是无法对运行时涉及到的表进行权限验证的，比如使用了触发器的情况。因此在执行器这里也要做一次执行时的权限验证。</p>
+<pre><code>mysql&gt; select * from T where ID=10;
+
+ERROR 1142 (42000): SELECT command denied to user 'b'@'localhost' for table 'T'
+</code></pre>
+<p>如果有权限，就打开表继续执行。<strong>打开表的时候，执行器就会根据表的引擎定义，去使用这个引擎提供的接口。</strong></p>
+<p>比如我们这个例子中的表 T 中，ID 字段没有索引，那么执行器的执行流程是这样的：</p>
+<ol>
+<li>调用 InnoDB 引擎接口取这个表的第一行，判断 ID 值是不是 10，如果不是则跳过，如果是则将这行存在结果集中；</li>
+<li>调用引擎接口取“下一行”，重复相同的判断逻辑，直到取到这个表的最后一行。</li>
+<li>执行器将上述遍历过程中所有满足条件的行组成的记录集作为结果集返回给客户端。</li>
+</ol>
+<p><span style="color:red">对于有索引的表，执行的逻辑也差不多。第一次调用的是“取满足条件的第一行”这个接口，之后循环取“满足条件的下一行”这个接口，这些接口都是引擎中已经定义好的。</span></p>
+<ul>
+<li>你会在数据库的慢查询日志中看到一个 <code>rows_examined</code> 的字段，<strong>表示这个语句执行过程中扫描了多少行</strong>。</li>
+<li>这个值就是在执行器每次调用引擎获取数据行的时候累加的。</li>
+</ul>
+<blockquote>
+<p>一个是执行器调用的次数。 一个是引擎总共扫描行数。</p>
+</blockquote>
+<p>在有些场景下，<strong>执行器调用一次，在引擎内部则扫描了多行，因此引擎扫描行数跟 <code>rows_examined</code> 并不是完全相同的。</strong></p>
+<h2 id="6"><strong>6、小节总结</strong></h2>
+<h3 id="6-1"><strong>6-1 提问</strong></h3>
+<p>如果表 T 中没有字段 k，而你执行了这个语句 <code>select * from T where k=1</code>, 那肯定是会报“不存在这个列”的错误：<code>“Unknown column ‘k’ in ‘where clause’”</code>。</p>
+<p>你觉得这个错误是在我们上面提到的哪个阶段报出来的呢？</p>
+<p><strong>分析器。</strong></p>
+<ul>
+<li><strong>解析语句，生成解析树</strong> </li>
+<li><strong>检查语句中的关键词，表，字段是否存在</strong></li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        <a href="../.." class="md-footer__link md-footer__link--prev" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                上一页
+              </span>
+              Welcome
+            </div>
+          </div>
+        </a>
+      
+      
+        <a href="../2mysql_logs/" class="md-footer__link md-footer__link--next" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                下一页
+              </span>
+              第二节 日志系统：执行一条SQL更新语句
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2021-9999 Jacob Xi
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+        
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "\u590d\u5236", "clipboard.copied": "\u5df2\u590d\u5236", "search.config.lang": "ja", "search.config.pipeline": "trimmer, stemmer", "search.config.separator": "[\\uff0c\\u3002]+", "search.placeholder": "\u641c\u7d22", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}, "search": "../../assets/javascripts/workers/search.fe42c31b.min.js", "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.7353b375.min.js"></script>
+      
+    
+  </body>
+</html>
