@@ -25,6 +25,7 @@ nav:
   - 'MySQL 基础操作篇':
     - '第一节 数据库简介、及常用数据库介绍': 'db_ops/1db_intro.md'
     - '第二节 安装 MySQL Repository & Jam db install': 'db_ops/2db_install.md'
+    - '第三节 结构化查询语言 SQL': 'db_ops/3db_sql.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
