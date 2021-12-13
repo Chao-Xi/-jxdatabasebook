@@ -28,6 +28,14 @@ nav:
     - '第三节 结构化查询语言 SQL': 'db_ops/3db_sql.md'
     - '第四节 MySQL 操作实例(上)': 'db_ops/4db_sql_ops1.md'
     - '第五节 MySQL 操作实例(中)': 'db_ops/5db_sql_ops2.md'
+    - '第六节 Mysql操作实例(下)': 'db_ops/6db_sql_ops3.md'
+    - '第七节 MySQL 数据类型约束': 'db_ops/7db_type.md'
+    - '第八节 MySQL 索引': 'db_ops/8db_index.md'
+    - '第九节 MySQL 的用户管理和权限管理': 'db_ops/9db_mgt.md'
+    - '第十节 MySQL 日志管理': 'db_ops/10db_logs.md'
+    - '第十一节 MySQL备份概述': 'db_ops/11db_backup.md'
+    - '第十二节 MySQL逻辑备份mysqldump': 'db_ops/12db_mysqldump.md'
+
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
