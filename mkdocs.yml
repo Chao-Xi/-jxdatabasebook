@@ -34,7 +34,8 @@ nav:
     - '第九节 MySQL 的用户管理和权限管理': 'db_ops/9db_mgt.md'
     - '第十节 MySQL 日志管理': 'db_ops/10db_logs.md'
     - '第十一节 MySQL备份概述': 'db_ops/11db_backup.md'
-    - '第十二节 MySQL逻辑备份mysqldump': 'db_ops/12db_mysqldump.md'
+    - '第十二节 MySQL逻辑备份mysqldump': 'db_ops/13db_xtrabackup.md'
+    - '第十四节 MySQL 主从复制原理介绍': 'db_ops/14mysql_replicate.md'
 
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
