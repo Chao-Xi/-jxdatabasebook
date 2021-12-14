@@ -50,7 +50,6 @@
 
 ![Alt Image Text](../images/ops14_3.png "Body image")
 
-
 * 通过二进制日志
 * 至少两台（主、从）
 * 主服务器的二进制日志“拿”到从服务器上再运行一遍。
