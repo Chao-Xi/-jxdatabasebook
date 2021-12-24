@@ -38,6 +38,7 @@ nav:
     - '第十四节 MySQL 主从复制原理介绍': 'db_ops/14mysql_replicate.md'
     - '第十五节 MySQL 传统主从同步配置': 'db_ops/15mysql_master_slave.md'
     - '第十六节 MySQL 基于 GTID 的主从复制': 'db_ops/16mysq_gtid.md'
+    - 'Mysql OPS Review': 'db_ops/17ops_review.md'
 
 
   - 'Extra 知识扩展':
