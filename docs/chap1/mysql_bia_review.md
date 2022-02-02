@@ -111,3 +111,13 @@ SQL 标准的事务隔离级别包括：读未提交（read uncommitted）、读
 
 悲观锁就是一种真正的锁了，它会在获取资源前对资源进行加锁，确保同一时刻只有有限的线程能够访问该资源，其他想要尝试获取资源的操作都会进入等待状态，直到该线程完成了对资源的操作并且释放了锁后，其他线程才能重新操作资源；
 
+
+## **6 Primary keys**
+
+Primary keys must contain unique values.
+
+A primary key column cannot have NULL values.
+
+A table can have only one primary key, which may consist of single or multiple fields.
+
+When multiple fields are used as a primary key, they are called a composite key.
