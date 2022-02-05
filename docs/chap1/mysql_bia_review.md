@@ -121,3 +121,58 @@ A primary key column cannot have NULL values.
 A table can have only one primary key, which may consist of single or multiple fields.
 
 When multiple fields are used as a primary key, they are called a composite key.
+
+
+## **7 同步**
+
+### **如何判断mysql主从是否同步？该如何使其同步？**
+
+```
+Slave_IO_Running
+Slave_SQL_Running；
+```
+
+### **2.mysql的innodb如何定位锁问题，mysql如何减少主从复制延迟？**
+
+在使用 `show engine innodb status` 检查引擎状态时，发现了死锁问题
+
+### **mysql如何减少主从复制延迟:**
+
+* **从库硬件比主库差**，导致复制延迟
+* 主从复制单线程，**如果主库写并发太大，来不及传送到从库，就会导致延迟**。更高版本的mysql可以支持多线程复制
+* **慢SQL语句过多**
+* 网络延迟
+* **master负载: 主库读写压力大，导致复制延迟，架构的前端要加buffer及缓存层**
+
+**另外， 2个可以减少延迟的参数:**
+
+`-slave-net-timeout=seconds` 单位为秒 默认设置为 3600秒
+
+参数含义：当slave从主数据库读取log数据失败后，等待多久重新建立连接并获取数据
+
+
+`-master-connect-retry=seconds` 单位为秒 默认设置为 60秒
+
+参数含义：当重新建立主从连接时，如果连接建立失败，间隔多久后重试。
+
+**MySQL数据库主从同步延迟解决方案**
+
+
+最简单的减少slave同步延时的方案就是在架构上做优化，尽量让主库的DDL快速执行。还有就是主库是写，对数据安全性较高，比如 `sync_binlog=1`，
+
+
+### **mysql数据备份工具**
+
+* mysqldump工具
+* 基于LVM快照备份
+* tar包备份
+* percona提供的xtrabackup工具
+
+
+
+
+
+
+
+
+
