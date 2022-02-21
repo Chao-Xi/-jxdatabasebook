@@ -17,6 +17,9 @@ nav:
     - '第五节 全局锁和表锁' : 'chap1/5mysql_lock.md'
     - '第六节 事务到底是隔离的还是不隔离的' : 'chap1/6mysql_transaction_isolation.md'
     - 'MySQL 基础知识复习': 'chap1/mysql_bia_review.md'
+  - 'MySQL 实战篇':
+    - 'L1 表结构设计篇 - 数据类型': 'chap2/1table_design.md'
+    - 'L2 表结构设计篇 - 表设计': 'chap2/2table_design.md'
   - 'AWS Aurora 技术与实战教程':
     - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
