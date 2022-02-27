@@ -20,6 +20,7 @@ nav:
   - 'MySQL 实战篇':
     - 'L1 表结构设计篇 - 数据类型': 'chap2_opt/1table_design.md'
     - 'L2 表结构设计篇 - 表设计': 'chap2_opt/2table_design.md'
+    - 'L3 索引优化': 'chap2_opt/3table_index.md'
   - 'AWS Aurora 技术与实战教程':
     - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
@@ -43,8 +44,6 @@ nav:
     - '第十五节 MySQL 传统主从同步配置': 'db_ops/15mysql_master_slave.md'
     - '第十六节 MySQL 基于 GTID 的主从复制': 'db_ops/16mysq_gtid.md'
     - 'Mysql OPS Review': 'db_ops/17ops_review.md'
-
-
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
