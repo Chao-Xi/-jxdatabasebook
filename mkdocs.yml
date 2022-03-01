@@ -21,6 +21,7 @@ nav:
     - 'L1 表结构设计篇 - 数据类型': 'chap2_opt/1table_design.md'
     - 'L2 表结构设计篇 - 表设计': 'chap2_opt/2table_design.md'
     - 'L3 索引优化': 'chap2_opt/3table_index.md'
+    - 'L4 查询优化': 'chap2_opt/4table_query.md'
   - 'AWS Aurora 技术与实战教程':
     - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
