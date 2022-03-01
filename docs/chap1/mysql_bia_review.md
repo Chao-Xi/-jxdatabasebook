@@ -239,3 +239,37 @@ SQL中如果多张表数据需要同批次被更新，即如果其中一张表�
 
 环路等待条件：指在发生死锁时，必然存在一个进程——资源的环形链，即进程集合{P0，P1，P2，···，Pn}中的P0正在等待一个P1占用的资源；P1正在等待P2占用的资源，……，Pn正在等待已被P0占用的资源。
 
+## **11 What are the advantages of NoSQL over traditional RDBMS?**
+
+**NoSQL is better than RDBMS** because of the following reasons/properities of NoSQL:
+
+* It supports semi-structured data and volatile data
+* It **does not have schema**
+* **Read/Write throughput is very high**
+* **Horizontal scalability** can be achieved easily
+* **Will support Bigdata in volumes** of Terra Bytes & Peta Bytes
+* Provides good support for Analytic tools on top of Bigdata
+* **Can be hosted in cheaper hardware machines**
+* In-memory caching option is available to increase the performance of queries
+* Faster development life cycles for developers
+
+**Still, RDBMS is better than NoSQL** for the following reasons/properties of RDBMS:
+
+* Transactions with **ACID properties - Atomicity, Consistency, Isolation & Durability**
+* **Adherence to Strong Schema** of data being written/read
+* Real time query management ( in case of data size < 10 Tera bytes )
+* Execution of complex queries involving **join & group by clauses**
+
+
+### When should I use a NoSQL database instead of a relational database?
+
+
+**Relational databases enforces ACID**. So, you will have schema based transaction oriented data stores. It's proven and suitable for 99% of the real world applications. You can practically do anything with relational databases.
+
+But, there are limitations on speed and scaling when it comes to massive high availability data stores. For example, Google and Amazon have terabytes of data stored in big data centers. Querying and inserting is not performant in these scenarios because of the blocking/schema/transaction nature of the RDBMs. That's the reason they have implemented their own databases (actually, key-value stores) for massive performance gain and scalability.
+
+If you need a NoSQL db you usually know about it, possible reasons are:
+
+* client wants 99.999% availability on a high traffic site.
+* your data makes no sense in SQL, you find yourself doing multiple JOIN queries for accessing some piece of information.
+* you are breaking the relational model, you have CLOBs that store denormalized data and you generate external indexes to search that data.
