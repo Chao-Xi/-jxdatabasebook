@@ -24,6 +24,8 @@ nav:
     - 'L4 查询优化': 'chap2_opt/4table_query.md'
     - 'L5 高可用架构 - MySQL 复制': 'chap2_opt/5db_perf_replica.md'
     - 'L6 MySQL高可用架构': 'chap2_opt/6db_ha.md'
+    - 'L7 分布式架构篇': 'chap2_opt/7Dist_db.md'
+    - 'L8 Operation Interview': 'chap2_opt/8opt_int.md'
   - 'AWS Aurora 技术与实战教程':
     - '第一节 深入了解 Aurora 数据库' : 'aurora/1Intital_Explore.md'
     - '第二节 揭秘 Aurora 底层存储' : 'aurora/2Aurora_Adv.md'
