@@ -49,6 +49,7 @@ nav:
     - '第十五节 MySQL 传统主从同步配置': 'db_ops/15mysql_master_slave.md'
     - '第十六节 MySQL 基于 GTID 的主从复制': 'db_ops/16mysq_gtid.md'
     - 'Mysql OPS Review': 'db_ops/17ops_review.md'
+    - 'SQL操作精简版': 'db_ops/18review_short.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
