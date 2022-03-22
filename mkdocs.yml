@@ -50,6 +50,9 @@ nav:
     - '第十六节 MySQL 基于 GTID 的主从复制': 'db_ops/16mysq_gtid.md'
     - 'Mysql OPS Review': 'db_ops/17ops_review.md'
     - 'SQL操作精简版': 'db_ops/18review_short.md'
+  - 'MongoDB 实战教程':
+    - '1 MongoDB介绍': 'mongo1/1mongodb_intro.md'
+    - '2 MongoDB 快速安装': 'mongo1/2mongodb_install.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
