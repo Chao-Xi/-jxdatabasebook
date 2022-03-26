@@ -53,6 +53,8 @@ nav:
   - 'MongoDB 实战教程':
     - '1 MongoDB介绍': 'mongo1/1mongodb_intro.md'
     - '2 MongoDB 快速安装': 'mongo1/2mongodb_install.md'
+    - '3 在 Kubernetes 上编排 MongoDB 集群': 'mongo1/3mongodb_k8s_cluster.md'
+    - '4. MongoDB文档操作': 'mongo1/4mongodb_opt.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
