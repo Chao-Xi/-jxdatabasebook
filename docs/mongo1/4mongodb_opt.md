@@ -683,8 +683,101 @@ db.books.findAndModify({
 与findAndModify语义相近的命令如下 
 
 * findOneAndUpdate:更新单个文档并返回更新前（或更新后）的文档。 
-* findOneAndRepIace:替换单个文档并返回替换前（或替换后）的文档。 
+* findOneAndReplace:替换单个文档并返回替换前（或替换后）的文档。 
 
 
+## **3.4 删除文档**
+
+### **使用remove删除文档**
+
+* remove命令需要配合查询条件使用 
+* 匹配查询条件的文档会被删除； 
+* 指定一个空文档条件会删除所有文档 
+
+示例 
+
+```
+db.user.remove({age:28}) // 删除age等于28 的记录 
+db.user.remove({age:{$lt:25}}) // 删除age小于 25的记录 
+db.user.remove({}) // 删除所有记录
+db.user.remove() //报错 
+```
+
+remove命令会删除匹配条件的全部文档，如果希望明确限定只删除一个文档，则需要指`justOne`参数，命令格式如下 
+
+```
+db.collection.remove(query,justOne) 
+```
+
+例如：删除满足`type:novel`条件的首条记录 
+
+```
+db.books.remove({type:"novel"},true) 
+```
+
+```
+> db.books.remove({type:"novel"},true)
+WriteResult({ "nRemoved" : 1 })
+```
+
+```
+> db.books.remove()
+uncaught exception: Error: remove needs a query :
+DBCollection.prototype._parseRemove@src/mongo/shell/collection.js:362:15
+DBCollection.prototype.remove@src/mongo/shell/collection.js:389:18
+@(shell):1:1
+```
 
 
+### **使用delete删除文档**
+
+**官方推荐使用`deleteOne(）`和`deleteMany(）`方法删除文档，语法格式如下：**
+
+```
+db.books.deleteMany({})      // 删除集合下全部状态
+db.books.deleteMany({type:"novel"})  // 删除type等于novel的全部文档 
+db.books.deleteOne({type:"novel"})  /／删除type等于novel的一个文档 
+```
+
+注意：
+
+**`remove`, `deleteMany`等命令需要对查询范围内的文档逐个删除，如果希望删除整个集合，则使用drop命令会更加高效**
+
+
+```
+db.books.deleteOne({type:"travel"}) 
+```
+
+```
+> db.books.deleteOne({type:"travel"})
+{ "acknowledged" : true, "deletedCount" : 1 }
+```
+
+
+### **返回被删除文档**
+
+`remove`,`deleteOne`等命令在删除文档后只刽区回确认性的信息，如果希望获得被删除的文档，则可以使用`findOneAndDelete`命令 
+
+```
+db.books.findOneAndDelete({type:"novel"}) 
+```
+
+```
+> db.books.findOneAndDelete({type:"novel"})
+{
+	"_id" : ObjectId("623b0766b815b989a2335e81"),
+	"title" : "book-12",
+	"type" : "novel",
+	"tag" : "developer",
+	"favCount" : -100,
+	"author" : "xxx12",
+	"publishDate" : ISODate("2022-03-26T09:17:39.729Z")
+}
+```
+
+**除了在结果中返回删除文档，findOneAndDelete命令还允许定义"删除的顺序"，即按照指定顺序删除找到的第一个文档**
+
+```
+db.books.findOneAndDelete({type:"novel"},{sort:{favCount:1}}) 
+```
+remove, deleteOne等命令只能按默认顺序删除，利用这个特性， findOneAndDelete可以实现队列的先进先出。 
