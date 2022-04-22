@@ -56,6 +56,10 @@ nav:
     - '3 在 Kubernetes 上编排 MongoDB 集群': 'mongo1/3mongodb_k8s_cluster.md'
     - '4 MongoDB文档操作': 'mongo1/4mongodb_opt.md'
     - '5 MongoDB整合SpringBoot': 'mongo1/5mongodb_springbboot.md'
+    - '6 MongoDB 聚合操作': 'mongo1/6mongodb_pip.md'
+    - '7 MongoDB聚合操作高级操作': 'mongo1/7mongodb_pip2.md'
+    - '8 MongoDB视图': 'mongo1/8mongodb_view.md'
+    - '9 MongoDB索引': 'mongo1/9mongodb_index.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
 
