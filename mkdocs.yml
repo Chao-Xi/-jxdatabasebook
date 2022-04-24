@@ -64,6 +64,7 @@ nav:
     - '11 explain执行计划详解': 'mongo1/11mongodb_explain.md'
   - 'PostgresSQL 12.6运维入门':
     - '1 PostgreSQL介绍&安装&链接管理&用户权限管理': 'pg1/2pg_intall.md'
+    - '2 常用基础命令介绍': 'pg1/3pg_cmd.md'
     - 'PostgreSQL Interview Questions 2022': 'pg1/1pg_int.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
