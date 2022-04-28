@@ -68,6 +68,8 @@ nav:
     - '3 Online WAL[Write Head Log]日志（redo)': 'pg1/4pg_logs.md'
     - '4 体系结构介绍': 'pg1/4pg_stru.md'
     - '5 备份恢复恢复': 'pg1/5pg_bak.md'
+    - '6 Master-Slave流复制': 'pg1/6pg_repl.md'
+    - '7 有用的系统函数': 'pg1/7pg_ops.md'
     - 'PostgreSQL Interview Questions 2022': 'pg1/1pg_int.md'
   - 'Extra 知识扩展':
     - 'GitHub+Travis+Mkdocs自动化构建文档库(DataBase)' : 'extra/mkdoc_gitbook.md'
