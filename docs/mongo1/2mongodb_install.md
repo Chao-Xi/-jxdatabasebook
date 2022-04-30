@@ -103,6 +103,38 @@ db.shutdownServer()
 server should be down...
 ```
 
+
+### **环境变量启动**
+
+```
+sudo -i
+
+vim .bash_profile
+export MONGODATA=/mongodb/data 
+export MONGOHOME=/home/vagrant/tmp/mongodb-linux-x86_64-rhel70-4.4.13
+export MONGOTOOL=/home/vagrant/tmp/mongodb-database-tools-rhel70-x86_64-100.5.2
+export PATH=$MONGOHOME/bin:$MONGOTOOL/bin::$PATH:.
+
+source .bash_profile
+```
+
+```
+[root]mongod --port=27017 --dbpath=/mongodb/data  --logpath=/mongodb/log/mongodb.log --bind_ip=0.0.0.0 --fork
+```
+```
+mongo
+MongoDB shell version v4.4.13
+connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("23fcb1a7-2a20-4f2b-8576-31643ae25961") }
+MongoDB server version: 4.4.13
+
+> show dbs
+admin     0.000GB
+config    0.000GB
+local     0.000GB
+```
+
+
 ### **利用配置文件启动服务**
 
 ```
