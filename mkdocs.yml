@@ -50,7 +50,7 @@ nav:
     - '第十六节 MySQL 基于 GTID 的主从复制': 'db_ops/16mysq_gtid.md'
     - 'Mysql OPS Review': 'db_ops/17ops_review.md'
     - 'SQL操作精简版': 'db_ops/18review_short.md'
-  - 'MongoDB 实战教程':
+  - 'MongoDB 操作实战教程':
     - '1 MongoDB介绍': 'mongo1/1mongodb_intro.md'
     - '2 MongoDB 快速安装': 'mongo1/2mongodb_install.md'
     - '3 在 Kubernetes 上编排 MongoDB 集群': 'mongo1/3mongodb_k8s_cluster.md'
@@ -62,6 +62,9 @@ nav:
     - '9 MongoDB索引': 'mongo1/9mongodb_index.md'
     - '10 索引属性': 'mongo1/10mongodb_index_adv.md'
     - '11 explain执行计划详解': 'mongo1/11mongodb_explain.md'
+  - 'MongoDB 高级实战教程(全)':
+    - '1 认识文档数据库 MongoDB & 及数据安装' : 'mongo2/1mon_intro_install.md'
+    - '2 MongoDB 基本操作及聚合操作实战' : 'mongo2/2mon_command.md'
   - 'PostgresSQL 12.6运维入门':
     - '1 PostgreSQL介绍&安装&链接管理&用户权限管理': 'pg1/2pg_intall.md'
     - '2 常用基础命令介绍': 'pg1/3pg_cmd.md'
