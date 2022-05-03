@@ -65,6 +65,11 @@ nav:
   - 'MongoDB 高级实战教程(全)':
     - '1 认识文档数据库 MongoDB & 及数据安装' : 'mongo2/1mon_intro_install.md'
     - '2 MongoDB 基本操作及聚合操作实战' : 'mongo2/2mon_command.md'
+    - '3 复制集机制及原理 & 实现': 'mongo2/3mon_rep.md'
+    - '4 MongoDB 全家桶': 'mongo2/4mon_tools.md'
+    - '5 Mongo 模型设计': 'mongo2/5mon_design.md'
+    - '6 MongoDB 事务开发': 'mongo2/6mon_red_write.md'
+    - '7 MongoDB Change Stream & 开发最佳实践': 'mongo2/7mon_changestream_bestdesign.md'
   - 'PostgresSQL 12.6运维入门':
     - '1 PostgreSQL介绍&安装&链接管理&用户权限管理': 'pg1/2pg_intall.md'
     - '2 常用基础命令介绍': 'pg1/3pg_cmd.md'
