@@ -23,7 +23,7 @@ nav:
     - '第十一节 浅谈数据库并发控制 - 锁和 MVCC': 'chap1/5DB_locc_mvcc.md'
     - '第十节 "Shallow Dive" MySQL 索引性能分析概要': 'chap1/mysql4_index_perf.md'
     - '第十一节 浅谈数据库并发控制 - 锁和 MVCC': 'chap1/5DB_locc_mvcc.md'
-    - '*第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树': 'chap1/mysql5_btree.md'
+    - '第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树': 'chap1/mysql5_btree.md'
     - 'MySQL 基础知识复习': 'chap1/mysql_bia_review.md'
   - 'MySQL 实战篇':
     - 'L1 表结构设计篇 - 数据类型': 'chap2_opt/1table_design.md'
