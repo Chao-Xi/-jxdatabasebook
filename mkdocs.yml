@@ -78,6 +78,11 @@ nav:
     - '13 MongoDB 性能': 'mongo2/13mon_perf.md'
     - '14 高级集群设计': 'mongo2/14mon_cluster.md'
     - '15 MongoDB上线及升级': 'mongo2/15mon_goonline.md'
+    - '16 MongoDB 应用实例和场景': 'mongo2/16mon_sample.md'
+    - '17 数据迁移': 'mongo2/17mon_dms.md'
+    - '18 MongoDB + Spark实战': 'mongo2/18mon_spark.md'
+    - '19 MongoDB SQL 套接件': 'mongo2/19mon_sql.md'
+    - '20 MongoDB 与微服务 & 数据中台': 'mongo2/20MongoDB_mico_middle_service.md'
   - 'PostgresSQL 12.6运维入门':
     - '1 PostgreSQL介绍&安装&链接管理&用户权限管理': 'pg1/2pg_intall.md'
     - '2 常用基础命令介绍': 'pg1/3pg_cmd.md'
