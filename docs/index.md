@@ -13,7 +13,7 @@ Well, believe it or not, today is 9th May 2022. I have been already locked down 
 > 说点开心的🤠
 
 * 封闭的将近两个月，每天可以做到长跑15km, 似乎减肥了，似乎😑
-* 看了几部不错的创业剧，有讲 Travis Kalanick Uber CEO 的《Super Pumped: The Battle For Uber》，故事重现Uber过山车式的兴衰、引起诸多后果的内外交战，体现硅谷的起起伏伏。讲Adam Neumann Wework CEO 的《WeCrashed: The Rise and Fall of WeWork》，讲述共享办公室公司WeWork的崛起以及衰落。在不到十年内，WeWork从一个共享办公空间发展成为一个470亿美元的全球品牌。然后又在短短的一年之内，损失了400亿美元。 还有讲 Theranos CEO Elizabeth Holmes《The Dropout》利欲熏心下Elizabeth开始不停造假，一度推出了根本没法提供正确数据的验血机；最终一切被拆穿后，Elizabeth现正面临刑事指控，而不认罪的她可能被判长达20年的刑期。 不得不说 Super Pumped 和 WeCrashed 的质量更高， nice shows 🤠
+* 看了几部不错的创业剧，有讲 Travis Kalanick Uber CEO 的《Super Pumped: The Battle For Uber》，故事重现Uber过山车式的兴衰、引起诸多后果的内外交战，体现硅谷的起起伏伏。讲Adam Neumann Wework CEO 的《WeCrashed: The Rise and Fall of WeWork》，讲述共享办公室公司WeWork的崛起以及衰落。还有讲 Theranos CEO Elizabeth Holmes《The Dropout》利欲熏心下Elizabeth开始不停造假。Nice shows 🤠
 * 另外 《月光骑士》不错， 《slow horse》不知道在讲啥， 《HALO》垃圾，白瞎了那么好的制作，白左去死。 The last but not least, 《大侦探波洛》真的是传世经典
 * 两本书，最近看书有点少 东野圭吾的《长长的回廊》，尼尔史蒂芬森的《雪崩》, 超源域真是好东西
 * 又开始看最新的 《巫师8》，我们的猎魔人又和女术士搞到一起了
