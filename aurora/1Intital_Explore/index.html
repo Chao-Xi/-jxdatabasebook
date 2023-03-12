@@ -1,0 +1,3254 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      
+        <link rel="prev" href="../../chap2_opt/8opt_int/">
+      
+      
+        <link rel="next" href="../2Aurora_Adv/">
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>第一节 深入了解 Aurora 数据库 - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aurora" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第一节 深入了解 Aurora 数据库
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          MySQL 基础篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql1_innodb/" class="md-nav__link">
+        第七节 "Shallow Dive" MySQL 和 InnoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql3_transaction/" class="md-nav__link">
+        第八节 "Shallow Dive" MySQL 中事务的实现(`transaction`)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql2_index/" class="md-nav__link">
+        第九节 "Shallow Dive" MySQL 索引设计概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql5_btree/" class="md-nav__link">
+        第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql_bia_review/" class="md-nav__link">
+        MySQL 基础知识复习
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          MySQL 实战篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 实战篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/1table_design/" class="md-nav__link">
+        L1 表结构设计篇 - 数据类型
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/2table_design/" class="md-nav__link">
+        L2 表结构设计篇 - 表设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/3table_index/" class="md-nav__link">
+        L3 索引优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/4table_query/" class="md-nav__link">
+        L4 查询优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/5db_perf_replica/" class="md-nav__link">
+        L5 高可用架构 - MySQL 复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/6db_ha/" class="md-nav__link">
+        L6 MySQL高可用架构
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/7Dist_db/" class="md-nav__link">
+        L7 分布式架构篇
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/9Mysql_copy/" class="md-nav__link">
+        L8 MySQL的零拷贝技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/8opt_int/" class="md-nav__link">
+        L8 Operation Interview
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          AWS Aurora 技术与实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          第一节 深入了解 Aurora 数据库
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        第一节 深入了解 Aurora 数据库
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-amazon-aurora" class="md-nav__link">
+    1、什么是 Amazon Aurora  专门为云打造的关系数据库
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2auroraaws" class="md-nav__link">
+    2、Aurora是AWS史上增长最快的服务
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3amazon-aurora" class="md-nav__link">
+    3、Amazon Aurora 的优势
+  </a>
+  
+    <nav class="md-nav" aria-label="3、Amazon Aurora 的优势">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-1" class="md-nav__link">
+    3-1 高性能和高可扩展性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-2" class="md-nav__link">
+    3-2 高可用性和高耐用性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3" class="md-nav__link">
+    3-3 高度安全
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-4" class="md-nav__link">
+    3-4 完全托管
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-5-aurora" class="md-nav__link">
+    3-5 Aurora适用场景
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4amazon-aurora" class="md-nav__link">
+    4、Amazon Aurora 架构之： 性能
+  </a>
+  
+    <nav class="md-nav" aria-label="4、Amazon Aurora 架构之： 性能">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1" class="md-nav__link">
+    4-1 传统分布式数据库的堆栈
+  </a>
+  
+    <nav class="md-nav" aria-label="4-1 传统分布式数据库的堆栈">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-1" class="md-nav__link">
+    4-1-1 分片
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-1-2" class="md-nav__link">
+    4-1-2 无共享
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-1-3" class="md-nav__link">
+    4-1-3 共享磁盘
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-amazon-aurora" class="md-nav__link">
+    4-2 Amazon Aurora: 横向扩展，分布式架构
+  </a>
+  
+    <nav class="md-nav" aria-label="4-2 Amazon Aurora: 横向扩展，分布式架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-2-1" class="md-nav__link">
+    4-2-1 横向扩展且基于日志结构的分布式存储
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5amazon-aurora" class="md-nav__link">
+    5、Amazon Aurora存储引擎概述
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6mysql-amzaon-aurora-io" class="md-nav__link">
+    6、MySQL 与 Amzaon Aurora的 I/O 配置差异
+  </a>
+  
+    <nav class="md-nav" aria-label="6、MySQL 与 Amzaon Aurora的 I/O 配置差异">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1-mysql" class="md-nav__link">
+    6-1 主从配置mysql
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2-amazon-aurora" class="md-nav__link">
+    6-2 Amazon Aurora
+  </a>
+  
+    <nav class="md-nav" aria-label="6-2 Amazon Aurora">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#io" class="md-nav__link">
+    传统数据库的IO
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aurora-io" class="md-nav__link">
+    Aurora IO
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-3-aurora-mysqlmysql5" class="md-nav__link">
+    6-3 写入与读取吞吐量Aurora MySQL速度可达MySQL5倍
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-4-aurora-mysql-mysql-25" class="md-nav__link">
+    6-4 Aurora MySQL 据加载速度相当于MySQL 2.5倍
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7amazon-aurora" class="md-nav__link">
+    7、Amazon Aurora只读副本
+  </a>
+  
+    <nav class="md-nav" aria-label="7、Amazon Aurora只读副本">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-1-aurora" class="md-nav__link">
+    7-1 Aurora 集群访问
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-2" class="md-nav__link">
+    7-2 通过只读副本对读取进行横向扩展
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-3-aurora" class="md-nav__link">
+    7-3 Aurora只读副本自动伸缩技术
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-4-amazon-aurora-mysql" class="md-nav__link">
+    7-4 Amazon Aurora MySQL逻辑与物理复制延迟
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    8、运行过程中的仲裁与本地跟踪 （事务机制）
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    9、主从同步的记录机制
+  </a>
+  
+    <nav class="md-nav" aria-label="9、主从同步的记录机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9-1-t1-t4-4" class="md-nav__link">
+    9-1  T1-&gt;T4 4个事务分别对数据块进行操作
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-2-t1" class="md-nav__link">
+    9-2 T1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-3-t1t2t3t4" class="md-nav__link">
+    9-3 T1,T2,T3,T4 按顺序对主节点进行变更
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-4-amozon-aurora200" class="md-nav__link">
+    9-4 负载条件下的性能变化 Amozon Aurora＞一致性提升200倍
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10amazon-aurora" class="md-nav__link">
+    10、Amazon Aurora架构之：可用性与持久性
+  </a>
+  
+    <nav class="md-nav" aria-label="10、Amazon Aurora架构之：可用性与持久性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-1-1" class="md-nav__link">
+    10-1 “可用区+1”的容错机制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-2-aurora" class="md-nav__link">
+    10-2 Aurora数据库备份与恢复技术(持续备份)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-3" class="md-nav__link">
+    10-3 数据库回溯
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-4-caches" class="md-nav__link">
+    10-4 存活 caches
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-5" class="md-nav__link">
+    10-5 即时崩溃重做恢复
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-6" class="md-nav__link">
+    10-6 读取副节点与快速故障转移
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-7-15" class="md-nav__link">
+    10-7 多达15个可提升的只读副本
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-8-aurora" class="md-nav__link">
+    10-8 Aurora数据库克隆技术
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-9" class="md-nav__link">
+    10-9 全球数据库更快的灾难恢复速度与数据位置强化
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-aurora" class="md-nav__link">
+    11、 Aurora 新特性
+  </a>
+  
+    <nav class="md-nav" aria-label="11、 Aurora 新特性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-1-aurora-multi-master" class="md-nav__link">
+    11-1 Aurora Multi-Master
+  </a>
+  
+    <nav class="md-nav" aria-label="11-1 Aurora Multi-Master">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-1-recommended-workloads-for-multi-master-clusters" class="md-nav__link">
+    11-1 Recommended workloads for multi-master clusters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-2-auroraserverless" class="md-nav__link">
+    11-2 Aurora无服务器架构(Serverless)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-3" class="md-nav__link">
+    11-3 并行查询
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-4-aurora" class="md-nav__link">
+    11-4 Aurora全球同库跨区域多主节点
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          MySQL on K8S
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/2mysql_Master_slave/" class="md-nav__link">
+        第二节 在K8s中部署主从结构的MySQL服务
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          MySQL 基础操作篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础操作篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/1db_intro/" class="md-nav__link">
+        第一节 数据库简介、及常用数据库介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/2db_install/" class="md-nav__link">
+        第二节 安装 MySQL Repository & Jam db install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/3db_sql/" class="md-nav__link">
+        第三节 结构化查询语言 SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/4db_sql_ops1/" class="md-nav__link">
+        第四节 MySQL 操作实例(上)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/5db_sql_ops2/" class="md-nav__link">
+        第五节 MySQL 操作实例(中)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/6db_sql_ops3/" class="md-nav__link">
+        第六节 Mysql操作实例(下)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/7db_type/" class="md-nav__link">
+        第七节 MySQL 数据类型约束
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/8db_index/" class="md-nav__link">
+        第八节 MySQL 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/9db_mgt/" class="md-nav__link">
+        第九节 MySQL 的用户管理和权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/10db_logs/" class="md-nav__link">
+        第十节 MySQL 日志管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/11db_backup/" class="md-nav__link">
+        第十一节 MySQL备份概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/13db_xtrabackup/" class="md-nav__link">
+        第十二节 MySQL逻辑备份mysqldump
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/14mysql_replicate/" class="md-nav__link">
+        第十四节 MySQL 主从复制原理介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/15mysql_master_slave/" class="md-nav__link">
+        第十五节 MySQL 传统主从同步配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/16mysq_gtid/" class="md-nav__link">
+        第十六节 MySQL 基于 GTID 的主从复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/17ops_review/" class="md-nav__link">
+        Mysql OPS Review
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/18review_short/" class="md-nav__link">
+        SQL操作精简版
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          MongoDB 操作实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 操作实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/1mongodb_intro/" class="md-nav__link">
+        1 MongoDB介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/2mongodb_install/" class="md-nav__link">
+        2 MongoDB 快速安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/3mongodb_k8s_cluster/" class="md-nav__link">
+        3 在 Kubernetes 上编排 MongoDB 集群
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/4mongodb_opt/" class="md-nav__link">
+        4 MongoDB文档操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/5mongodb_springbboot/" class="md-nav__link">
+        5 MongoDB整合SpringBoot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/6mongodb_pip/" class="md-nav__link">
+        6 MongoDB 聚合操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/7mongodb_pip2/" class="md-nav__link">
+        7 MongoDB聚合操作高级操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/8mongodb_view/" class="md-nav__link">
+        8 MongoDB视图
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/9mongodb_index/" class="md-nav__link">
+        9 MongoDB索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/10mongodb_index_adv/" class="md-nav__link">
+        10 索引属性
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/11mongodb_explain/" class="md-nav__link">
+        11 explain执行计划详解
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          MongoDB 高级实战教程(全)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 高级实战教程(全)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/1mon_intro_install/" class="md-nav__link">
+        1 认识文档数据库 MongoDB & 及数据安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/2mon_command/" class="md-nav__link">
+        2 MongoDB 基本操作及聚合操作实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/3mon_rep/" class="md-nav__link">
+        3 复制集机制及原理 & 实现
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/4mon_tools/" class="md-nav__link">
+        4 MongoDB 全家桶
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/5mon_design/" class="md-nav__link">
+        5 Mongo 模型设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/6mon_red_write/" class="md-nav__link">
+        6 MongoDB 事务开发
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/7mon_changestream_bestdesign/" class="md-nav__link">
+        7 MongoDB Change Stream & 开发最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/8mon_shard/" class="md-nav__link">
+        8 Mongo Shards分片技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/9mon_monitor/" class="md-nav__link">
+        9 MongoDB 监控最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/10mon_bakup_restore/" class="md-nav__link">
+        10 MongoDB 备份与恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/11mon_sec/" class="md-nav__link">
+        11 MongoDB 安全设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/12mon_index/" class="md-nav__link">
+        12 MongoDB 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/13mon_perf/" class="md-nav__link">
+        13 MongoDB 性能
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/14mon_cluster/" class="md-nav__link">
+        14 高级集群设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/15mon_goonline/" class="md-nav__link">
+        15 MongoDB上线及升级
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/16mon_sample/" class="md-nav__link">
+        16 MongoDB 应用实例和场景
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/17mon_dms/" class="md-nav__link">
+        17 数据迁移
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/18mon_spark/" class="md-nav__link">
+        18 MongoDB + Spark实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/19mon_sql/" class="md-nav__link">
+        19 MongoDB SQL 套接件
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/20MongoDB_mico_middle_service/" class="md-nav__link">
+        20 MongoDB 与微服务 & 数据中台
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          PostgresSQL 12.6运维入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          PostgresSQL 12.6运维入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/2pg_intall/" class="md-nav__link">
+        1 PostgreSQL介绍&安装&链接管理&用户权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/3pg_cmd/" class="md-nav__link">
+        2 常用基础命令介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_logs/" class="md-nav__link">
+        3 Online WAL[Write Head Log]日志（redo)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_stru/" class="md-nav__link">
+        4 体系结构介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/5pg_bak/" class="md-nav__link">
+        5 备份恢复恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/6pg_repl/" class="md-nav__link">
+        6 Master-Slave流复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/7pg_ops/" class="md-nav__link">
+        7 有用的系统函数
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/1pg_int/" class="md-nav__link">
+        PostgreSQL Interview Questions 2022
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          AWS DB OTHERs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          AWS DB OTHERs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/1aws_neptune/" class="md-nav__link">
+        L1 深入了解 Amazon Neptune 图数据库技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/2dydb1/" class="md-nav__link">
+        L2 分布式键值存储 Dynamo 的实现原理
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          Extra 知识扩展
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-amazon-aurora" class="md-nav__link">
+    1、什么是 Amazon Aurora  专门为云打造的关系数据库
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2auroraaws" class="md-nav__link">
+    2、Aurora是AWS史上增长最快的服务
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3amazon-aurora" class="md-nav__link">
+    3、Amazon Aurora 的优势
+  </a>
+  
+    <nav class="md-nav" aria-label="3、Amazon Aurora 的优势">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-1" class="md-nav__link">
+    3-1 高性能和高可扩展性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-2" class="md-nav__link">
+    3-2 高可用性和高耐用性
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3" class="md-nav__link">
+    3-3 高度安全
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-4" class="md-nav__link">
+    3-4 完全托管
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-5-aurora" class="md-nav__link">
+    3-5 Aurora适用场景
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4amazon-aurora" class="md-nav__link">
+    4、Amazon Aurora 架构之： 性能
+  </a>
+  
+    <nav class="md-nav" aria-label="4、Amazon Aurora 架构之： 性能">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1" class="md-nav__link">
+    4-1 传统分布式数据库的堆栈
+  </a>
+  
+    <nav class="md-nav" aria-label="4-1 传统分布式数据库的堆栈">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-1" class="md-nav__link">
+    4-1-1 分片
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-1-2" class="md-nav__link">
+    4-1-2 无共享
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-1-3" class="md-nav__link">
+    4-1-3 共享磁盘
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-amazon-aurora" class="md-nav__link">
+    4-2 Amazon Aurora: 横向扩展，分布式架构
+  </a>
+  
+    <nav class="md-nav" aria-label="4-2 Amazon Aurora: 横向扩展，分布式架构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-2-1" class="md-nav__link">
+    4-2-1 横向扩展且基于日志结构的分布式存储
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5amazon-aurora" class="md-nav__link">
+    5、Amazon Aurora存储引擎概述
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6mysql-amzaon-aurora-io" class="md-nav__link">
+    6、MySQL 与 Amzaon Aurora的 I/O 配置差异
+  </a>
+  
+    <nav class="md-nav" aria-label="6、MySQL 与 Amzaon Aurora的 I/O 配置差异">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#6-1-mysql" class="md-nav__link">
+    6-1 主从配置mysql
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-2-amazon-aurora" class="md-nav__link">
+    6-2 Amazon Aurora
+  </a>
+  
+    <nav class="md-nav" aria-label="6-2 Amazon Aurora">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#io" class="md-nav__link">
+    传统数据库的IO
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#aurora-io" class="md-nav__link">
+    Aurora IO
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-3-aurora-mysqlmysql5" class="md-nav__link">
+    6-3 写入与读取吞吐量Aurora MySQL速度可达MySQL5倍
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-4-aurora-mysql-mysql-25" class="md-nav__link">
+    6-4 Aurora MySQL 据加载速度相当于MySQL 2.5倍
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7amazon-aurora" class="md-nav__link">
+    7、Amazon Aurora只读副本
+  </a>
+  
+    <nav class="md-nav" aria-label="7、Amazon Aurora只读副本">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#7-1-aurora" class="md-nav__link">
+    7-1 Aurora 集群访问
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-2" class="md-nav__link">
+    7-2 通过只读副本对读取进行横向扩展
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-3-aurora" class="md-nav__link">
+    7-3 Aurora只读副本自动伸缩技术
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#7-4-amazon-aurora-mysql" class="md-nav__link">
+    7-4 Amazon Aurora MySQL逻辑与物理复制延迟
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    8、运行过程中的仲裁与本地跟踪 （事务机制）
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    9、主从同步的记录机制
+  </a>
+  
+    <nav class="md-nav" aria-label="9、主从同步的记录机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9-1-t1-t4-4" class="md-nav__link">
+    9-1  T1-&gt;T4 4个事务分别对数据块进行操作
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-2-t1" class="md-nav__link">
+    9-2 T1
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-3-t1t2t3t4" class="md-nav__link">
+    9-3 T1,T2,T3,T4 按顺序对主节点进行变更
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#9-4-amozon-aurora200" class="md-nav__link">
+    9-4 负载条件下的性能变化 Amozon Aurora＞一致性提升200倍
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10amazon-aurora" class="md-nav__link">
+    10、Amazon Aurora架构之：可用性与持久性
+  </a>
+  
+    <nav class="md-nav" aria-label="10、Amazon Aurora架构之：可用性与持久性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-1-1" class="md-nav__link">
+    10-1 “可用区+1”的容错机制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-2-aurora" class="md-nav__link">
+    10-2 Aurora数据库备份与恢复技术(持续备份)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-3" class="md-nav__link">
+    10-3 数据库回溯
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-4-caches" class="md-nav__link">
+    10-4 存活 caches
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-5" class="md-nav__link">
+    10-5 即时崩溃重做恢复
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-6" class="md-nav__link">
+    10-6 读取副节点与快速故障转移
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-7-15" class="md-nav__link">
+    10-7 多达15个可提升的只读副本
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-8-aurora" class="md-nav__link">
+    10-8 Aurora数据库克隆技术
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-9" class="md-nav__link">
+    10-9 全球数据库更快的灾难恢复速度与数据位置强化
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-aurora" class="md-nav__link">
+    11、 Aurora 新特性
+  </a>
+  
+    <nav class="md-nav" aria-label="11、 Aurora 新特性">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-1-aurora-multi-master" class="md-nav__link">
+    11-1 Aurora Multi-Master
+  </a>
+  
+    <nav class="md-nav" aria-label="11-1 Aurora Multi-Master">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-1-recommended-workloads-for-multi-master-clusters" class="md-nav__link">
+    11-1 Recommended workloads for multi-master clusters
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-2-auroraserverless" class="md-nav__link">
+    11-2 Aurora无服务器架构(Serverless)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-3" class="md-nav__link">
+    11-3 并行查询
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#11-4-aurora" class="md-nav__link">
+    11-4 Aurora全球同库跨区域多主节点
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="aurora"><strong>第一节 深入了解 Aurora 数据库</strong></h1>
+<h2 id="1-amazon-aurora"><strong>1、什么是 Amazon Aurora  专门为云打造的关系数据库</strong></h2>
+<ul>
+<li>高端商用数据库的<strong>性能</strong>和<strong>可用性</strong></li>
+<li>开源数据库的<strong>简单性</strong>和<strong>成本效益</strong></li>
+<li><strong>完全兼容 MySQL 和 PostgreSQL 开源数据库</strong> </li>
+<li><strong>按使用量付费</strong>，Pay as you go</li>
+</ul>
+<p><strong>全托管的数据库</strong>： 用户不用考虑物理的设备的管理</p>
+<h2 id="2auroraaws"><strong>2、Aurora是AWS史上增长最快的服务</strong></h2>
+<p><img alt="Alt Image Text" src="../../images/aua1_1.png" title="Body image" /></p>
+<p>在前百大AWS客户中，有四分之三选择使用Amazon Aurora</p>
+<h2 id="3amazon-aurora"><strong>3、Amazon Aurora 的优势</strong></h2>
+<p><strong>兼容 MySQL 和 PostgreSQL 的关系数据库。 性能和可用性与商用数据库相当，成本只有 1/10。</strong></p>
+<h3 id="3-1"><strong>3-1 高性能和高可扩展性</strong></h3>
+<ul>
+<li>5 倍于标准 MySQL 的吞吐量</li>
+<li>3 倍于PostgreSQL 的吞吐量 </li>
+<li>性能相当而成本仅为商用DB的1/10 </li>
+<li><strong>可以跨3个AZ,最多 15 个可读副本</strong> </li>
+<li><strong>存储自增长，单实例可达 64TB</strong></li>
+</ul>
+<h3 id="3-2"><strong>3-2 高可用性和高耐用性</strong></h3>
+<ul>
+<li>可用性高于 99.99% </li>
+<li>具有容错及自我修复能力 </li>
+<li><strong>跨3个AZ复制6个数据副本</strong> </li>
+<li>数据持续备份到 S3 </li>
+<li><strong>实例故障转移小于30秒</strong></li>
+</ul>
+<h3 id="3-3"><strong>3-3 高度安全</strong></h3>
+<ul>
+<li>部署在客户的VPC, 通过VPC进行网络级隔离，</li>
+<li>支持静态存储及传输时加密，</li>
+<li><strong>集群中的备份、快照和副本自动加密</strong></li>
+</ul>
+<h3 id="3-4"><strong>3-4 完全托管</strong></h3>
+<ul>
+<li>无需担心硬件、软件补丁、 设置、配置或备份等数据库管理任务。</li>
+<li><strong>会自动持续监控并将其备份到 S3，可以实现精细的时间点恢复。</strong></li>
+</ul>
+<h3 id="3-5-aurora"><strong>3-5 Aurora适用场景</strong></h3>
+<p><strong>主要场景</strong> </p>
+<ul>
+<li>关系型数据库的场景 </li>
+<li>读写读写负载极高——社交应用，大型网站，游戏，币圈交易等 </li>
+<li>数据库容且很大，并且增长较快 </li>
+<li>数据库并并发量员高，包含了OLTP和部分数据分析场景 </li>
+<li>需要sharding数据或者使用分库分表中间件 </li>
+<li>对数据库可用性要求很高的场景、</li>
+</ul>
+<p><strong>受益</strong> </p>
+<ul>
+<li>高可用及持久性 </li>
+<li>高并发及吞吐量</li>
+</ul>
+<h2 id="4amazon-aurora"><strong>4、Amazon Aurora 架构之： 性能</strong></h2>
+<h3 id="4-1"><strong>4-1 传统分布式数据库的堆栈</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_2.png" title="Body image" /></p>
+<h4 id="4-1-1"><strong>4-1-1 分片</strong></h4>
+<ul>
+<li>应用程序连接到<strong>中间件</strong>的平台上</li>
+<li><strong>中间件</strong>把读写数据的请求路由到不同的数据库上面</li>
+<li><strong>不同的数据库各自维护一部分的数据存在本地的存储里</strong></li>
+</ul>
+<h4 id="4-1-2"><strong>4-1-2 无共享</strong></h4>
+<ul>
+<li>我们有不同的，各自独立的数据库服务器</li>
+<li>这些服务器加入一个组里面来</li>
+<li>应用程序往本地数据库写事务</li>
+<li><strong>事务写入后，通过数据库引擎层进行数据的分发和同步</strong> =&gt; replication group</li>
+</ul>
+<h4 id="4-1-3"><strong>4-1-3 共享磁盘</strong></h4>
+<ul>
+<li>共享磁盘 + 共享缓存</li>
+<li>Oracle rac 通过共享存储的方式让每一个数据库节点或者共享实例都能读到相同的数据</li>
+<li>应用程序往任何一个实例进行读写操作，每个数据库节点都可以看到整个集群里的数据，包括内存和硬盘上的</li>
+</ul>
+<h3 id="4-2-amazon-aurora"><strong>4-2 Amazon Aurora: 横向扩展，分布式架构</strong></h3>
+<p><strong>应用于数据库的面向服务的体系结构</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua1_32.png" title="Body image" /></p>
+<ul>
+<li>将日志和存储层移动到可扩展、数据库优化的存储服务中 <ul>
+<li>Aurora数据库包含上层实例和底层存储.计算存储分离，易于横向扩展</li>
+<li><strong>分离了缓存和计算</strong>，就算数据库进程挂掉，重启数据库进程，它的缓存还在。<strong>极大的提高数据库的性能以及备份和恢复方面起到帮助</strong></li>
+</ul>
+</li>
+<li>与S3, VPC以及Route 53等其他AWS服 务紧密结合完成控制和监视任务</li>
+<li>托管数据库服务Amazon RDS. 完成运维和管理任务． </li>
+<li>持续备份与S3集成，并具有11个9的持久性 </li>
+</ul>
+<p>利用AWS 现有服务</p>
+<ul>
+<li>DynamoDB(Key-Value): 存储原数据metadata, exp, 存储节点的数据分部，软件的情况</li>
+<li>Route53: DNS的变化</li>
+<li>EC2</li>
+<li>S3 备份</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_3.png" title="Body image" /></p>
+<ul>
+<li><strong>分布式体现在存储层，数据分部在共享的存储卷中</strong></li>
+<li><strong>存储卷横跨三个AZ</strong></li>
+<li><strong>每份数据有6份拷贝</strong></li>
+<li>主节点： <strong>当数据库服务器发出一个修改操作（dml) ,只有响应的日志流会写入共享存储卷</strong></li>
+<li><strong>修改的数据块（或者脏数据块）不会被刷新到磁盘上</strong></li>
+</ul>
+<h4 id="4-2-1"><strong>4-2-1 横向扩展且基于日志结构的分布式存储 </strong></h4>
+<p><img alt="Alt Image Text" src="../../images/aua1_3.png" title="Body image" /></p>
+<ul>
+<li>将Log机制推送至存储层 </li>
+<li>4/6写入仲裁与本地跟踪 <ul>
+<li>写入性能: <strong>只保留Log写入盘，提高了并发的写入性能</strong></li>
+<li>读取横向扩展：<ul>
+<li><strong>读副本和主节点共享存储卷</strong></li>
+<li>读副本不需要像传统的关系数据库通过应用日志去追主库的，读副本不需要自己维护一个数据文件，它和主节点共享数据文件</li>
+<li>很方便的添加读副本节点，提高读的效率</li>
+</ul>
+</li>
+<li>可用区<code>+1</code> 容错机制： 6份副本可以无视AZ的崩溃以及一个存储节点的崩溃</li>
+<li>即时数据库重做恢复： 10Gb/segment 为单位去恢复，并发操作，效率非常的高</li>
+</ul>
+</li>
+</ul>
+<h2 id="5amazon-aurora"><strong>5、Amazon Aurora存储引擎概述</strong></h2>
+<ul>
+<li>数据在3 Availability Zones中复制6份(每一份存在一份存储节点) </li>
+<li>持续备份到Amazon S3 (11个9的持久性）</li>
+<li>持续监视节点和磁盘并自动修复</li>
+<li>10GB的区段作为修复和存储自动增长的基础，存储最大扩展到64TB </li>
+<li>4/6 写入仲裁 </li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_6.png" title="Body image" />     </p>
+<h2 id="6mysql-amzaon-aurora-io"><strong>6、MySQL 与 Amzaon Aurora的 I/O 配置差异</strong></h2>
+<p><img alt="Alt Image Text" src="../../images/aua1_4.png" title="Body image" /></p>
+<h3 id="6-1-mysql"><strong>6-1 主从配置mysql</strong></h3>
+<ol>
+<li>每次主实例发生事务，每次事务产生的日志和事务修改的脏数据，都会刷新到磁盘上</li>
+<li><strong>同时主实例上产生的日志会通过复制的技术传递到从节点</strong></li>
+<li>从节点接收到日志后，会把主节点发生的事情全部replay一次，把从节点上的数据更新到与主节点一致</li>
+<li>整个过程有很多的IO操作包括1，3，4</li>
+<li>尤其是随机io(2,5), 脏数据块落盘会产生大量的IO</li>
+</ol>
+<h3 id="6-2-amazon-aurora"><strong>6-2 Amazon Aurora</strong></h3>
+<ol>
+<li>只有日志流会落盘，数据本身不落盘</li>
+<li>日志流落盘以后，在存储层面通过很多的存储节点并行的生成脏数据</li>
+<li>Aurora 日志流也会从主实例发送到副实例： <strong>同步以及更新从节点内存里的数据</strong><ul>
+<li>主节点和从节点的内存里都有一个数据块叫做A，主节点上对它进行了更新变成了B，产生了日志，那么日志会传到从节点，把内存中的数据块从A变成B </li>
+</ul>
+</li>
+</ol>
+<h4 id="io"><strong>传统数据库的IO</strong></h4>
+<ul>
+<li>日志数据的I/O落盘 </li>
+<li>脏数据通过检查点的方式落盘</li>
+<li><strong>日志数据的I/O落盘 : 流式的顺序写操作，对磁盘I/O性能影响不大</strong></li>
+<li><strong>脏数据落盘： 随机IO，比较消耗磁盘I/O性能</strong></li>
+</ul>
+<p><strong>IO流</strong></p>
+<ul>
+<li>Issue write to EBS一EBS issues to mirror, ack when both done Stage write to standby Instance </li>
+<li>Issue write to EBS on standby instance </li>
+</ul>
+<p><strong>观察</strong></p>
+<ul>
+<li>Stept 1,3,4 are sequentlat and synchronous </li>
+<li>This amptifies both latency and jitter </li>
+<li>Many Tpes of writes for each user operation </li>
+<li>Have to write data blocks twice to avoid torn writes</li>
+</ul>
+<h4 id="aurora-io"><strong>Aurora IO</strong></h4>
+<ul>
+<li><strong>只保留了日志I/O落盘</strong></li>
+<li>利用底层大量的存储节点，<strong>对修改的数据进行重现</strong>，利用写在数据存储层的日志复现被修改的数据块， </li>
+<li><strong>数据块保存6份，分部在3个AZ的节点</strong></li>
+<li><strong>采用仲裁机制，6份中4份写入，视为写入成功</strong></li>
+</ul>
+<p><strong>观察</strong></p>
+<ul>
+<li>Only write redo records; </li>
+<li>all seeps asynchronous </li>
+<li>No data block writes (checkpoint, cache replacenrent) <strong>6X more</strong> log writes, but <strong>9X less</strong> network traffic Tolerant of network and storage outlier latency </li>
+</ul>
+<h3 id="6-3-aurora-mysqlmysql5"><strong>6-3 写入与读取吞吐量Aurora MySQL速度可达MySQL5倍</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_5.png" title="Body image" /></p>
+<h3 id="6-4-aurora-mysql-mysql-25"><strong>6-4 Aurora MySQL 据加载速度相当于MySQL 2.5倍</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_7.png" title="Body image" /></p>
+<h2 id="7amazon-aurora"><strong>7、Amazon Aurora只读副本</strong></h2>
+<p><img alt="Alt Image Text" src="../../images/aua1_8.png" title="Body image" /></p>
+<p><strong>可用性</strong></p>
+<ul>
+<li>支持最多15个只读副本 <ul>
+<li><strong>只读副本延迟落后与于主节点的时间特别的小，因为它不需要应用日志去追主节点</strong>  </li>
+</ul>
+</li>
+<li>自动添加或删除只读副本 <ul>
+<li>读副本不需要维护本地的存储，添加删除特别的快，不需要像传统Mysql建立从节点是从主节点备份再恢复的。 <strong>Aurora只需要部署从节点的CPU和内存即可</strong></li>
+</ul>
+</li>
+<li><strong>Monitor检测程序自动检测并替换失败的数据库节点</strong> ： <strong>自动替换坏掉的只读副本</strong> </li>
+<li>只读副本在主节点故障时自动提升为新的主库(failover) ： <strong>用户可以指定某个read replicat提升到主库</strong></li>
+<li>容户可以指定故障切换的顺序</li>
+</ul>
+<p><strong>性能</strong></p>
+<ul>
+<li>容户程序可以将读流量指向只读副本 ：<strong>当有多个readreplica 可以让用户指向一个endpoint,readony endpoint 可以把用户的请求路由的有readreplica的节点</strong></li>
+<li>读负载在多个只读副本间均衡</li>
+</ul>
+<h3 id="7-1-aurora"><strong>7-1 Aurora 集群访问</strong></h3>
+<ul>
+<li>可以包含一个主节点和15个只读副本，16个计算节点</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_33.png" title="Body image" /></p>
+<ul>
+<li><strong>共暴露了三种节点</strong></li>
+<li>集群访问端点，类似于JDBC这种URL，也就是一个master访问节点 （读写操作）</li>
+<li>只读访问端点， 访问所有的只读的副本 （只读操作）</li>
+<li>结点访问端点，访问某特定实例，或者说只读副本</li>
+</ul>
+<h3 id="7-2"><strong>7-2 通过只读副本对读取进行横向扩展</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_9.png" title="Body image" /></p>
+<ul>
+<li>传统Mysql 主节点上的事务通过log在从节点上再跑一遍</li>
+<li><strong>Aurora 从节点只是刷新内存里的数据块，如果内存中没有的数据块，不用刷新，直接读取主节点共享存储中的文件</strong></li>
+</ul>
+<h3 id="7-3-aurora"><strong>7-3 Aurora只读副本自动伸缩技术</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_34.png" title="Body image" /></p>
+<ul>
+<li>跨多个可用区最多可提升15个只读副本 </li>
+<li>基于重做日志复制的副本低延时一通常&lt;10毫秒 </li>
+<li>读取器端点具有负载平衡和自动缩放（CPU及连接数/read replica平均连接数）</li>
+</ul>
+<h3 id="7-4-amazon-aurora-mysql"><strong>7-4 Amazon Aurora MySQL逻辑与物理复制延迟</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_10.png" title="Body image" /></p>
+<ul>
+<li>在MySQL当中12分钟，我们看到复制延迟达到近12分钟。从实际应用的角度来看，这显然是种近乎荒谬的情况</li>
+<li><strong>利用Aurora,4个副本的最大读取延迟从未超过20毫秒</strong></li>
+</ul>
+<h2 id="8"><strong>8、运行过程中的仲裁与本地跟踪 （事务机制）</strong></h2>
+<p><strong>主节点里对数据块（page1）进行修改，四个事务T1,T2,T3,T4按照时间顺序对它进行修改</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua1_11.png" title="Body image" /></p>
+<ol>
+<li>T1,T2,T3,T4四个事务产生的日志会刷新到磁盘上</li>
+<li><strong>存储层利用日志产生数据块，并且会复制6份</strong></li>
+<li>T1复制了4份标记为已提交</li>
+<li>T2,T3小于6份，处于等待状态</li>
+</ol>
+<p><strong>并行刷新： T3复制了更多的数据块，达到5份副本</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua1_12.png" title="Body image" /></p>
+<ul>
+<li>T3不会被标记为已提交，因为T2没有完成4份副本的生成</li>
+<li>虽然并行刷新,但是要在日志层面保证一个先后顺序的，保证按照T1,T2,T3,T4的顺序去记录</li>
+<li>所以    T3  仍然出于等待提交的状态</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_13.png" title="Body image" /></p>
+<ul>
+<li>T1 完成6份副本， T2 完成4份副本， T3 完成5份副本， T4 完成6份副本， 都完成了4份副本的复制。 全部标记成已提交，并按照T1,T2,T3,T4的顺序记录到日志里</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_14.png" title="Body image" /></p>
+<ul>
+<li>全部完成六份副本的复制</li>
+</ul>
+<p><strong>Aurora 并没有一个分布式提交的算法</strong></p>
+<h2 id="9"><strong>9、主从同步的记录机制</strong></h2>
+<h3 id="9-1-t1-t4-4"><strong>9-1  T1-&gt;T4 4个事务分别对数据块进行操作</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_15.png" title="Body image" /></p>
+<h3 id="9-2-t1"><strong>9-2 T1</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_16.png" title="Body image" /></p>
+<ul>
+<li>T1 已经完成了主节点六块副本的复制</li>
+<li>T1的 log 已经从主节点异步的复制到了从节点</li>
+<li>从节点在内存中把数据块修改成了T1事务完成之后的状态，主从节点的内存体现的都是T1事务完成之后的状态</li>
+</ul>
+<h3 id="9-3-t1t2t3t4"><strong>9-3 T1,T2,T3,T4 按顺序对主节点进行变更</strong></h3>
+<p><strong>主节点内存现在体现了最新的状态： T4</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua1_17.png" title="Body image" /></p>
+<ul>
+<li>存储层停留在T2的状态，T2完成了6份副本的复制的拷贝</li>
+<li>T3,T4相应的日志还没有完成数据块的应用</li>
+<li>主从日志的异步传输，现在T2的日志刚刚复制到从节点，并完成应用，所以从节点的page1的状态是应用完事务T2的状态（紫色的状态）</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_18.png" title="Body image" /></p>
+<ul>
+<li>如果应用程序从主库和从库分别去读这个数据块，主节点一定从内存中读取最新的数据</li>
+<li>从节点读取的是应用完T2事务的数据</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_19.png" title="Body image" /></p>
+<ul>
+<li>最终T3,T4会在从节点的内存中完成应用，把数据块page1更新成最新的状态（T4)</li>
+<li>这时候再去读，就可以从主从分别读取到最新的状态了</li>
+<li>最终T3,T4的在存储层面被应用到数据块6块拷贝中去，存储层面和内存层面达成一致</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_20.png" title="Body image" /></p>
+<h3 id="9-4-amozon-aurora200"><strong>9-4 负载条件下的性能变化 Amozon Aurora＞一致性提升200倍</strong></h3>
+<p>Aurora的写入延迟非常的稳定</p>
+<p>R4.16XL的实例</p>
+<p><img alt="Alt Image Text" src="../../images/aua1_21.png" title="Body image" /></p>
+<p><strong>Mysql的抖动中的波峰是因为当mysql的内存进行checkpoint,刷新内存中的脏数据到磁盘上的时候，带来内存的涨幅到达波峰 =&gt; 写延迟就会提高</strong></p>
+<h2 id="10amazon-aurora"><strong>10、Amazon Aurora架构之：可用性与持久性</strong></h2>
+<h3 id="10-1-1"><strong>10-1 “可用区+1”的容错机制</strong></h3>
+<ul>
+<li>在大规模集群体系中，故障总会出现</li>
+<li>
+<p>可用区故障是一种“命中注定“ </p>
+</li>
+<li>
+<p>6份副本，每可用区2份</p>
+</li>
+<li><strong>2/3仲裁无法满足需求</strong> </li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_22.png" title="Body image" /></p>
+<ul>
+<li>一个AZ的崩溃，4/6仍可以保证<strong>写入成功</strong></li>
+<li><strong>3/6保证读取成功，一个AZ崩溃+一个存储节点崩溃，读取操作仍然可以发生</strong>，三分副本不能满足需求</li>
+</ul>
+<h3 id="10-2-aurora"><strong>10-2 Aurora数据库备份与恢复技术(持续备份)</strong></h3>
+<ol>
+<li>Aurora 不需要配置备份窗口，而传统RDS mysql 是需要配置备份窗口的</li>
+<li>Aurora不断的做快照保存在S3上，快照以分区为单位（segment:10GB)</li>
+<li>每个segment不断的做快照保存在S3，同时日志也会保存在S3上</li>
+<li>备份利用的是存储的技术来实现，对数据库服务器本身的CPU/MEMORY资源不消耗，对数据库服务器本身不影响性能</li>
+</ol>
+<p><img alt="Alt Image Text" src="../../images/aua1_23.png" title="Body image" /></p>
+<ul>
+<li><strong>并行为每个段定期拍快照，将重做日志流传输到S3存储桶</strong></li>
+<li>持续进行备份，并不影响性能或可用性水平</li>
+<li>时间点恢复</li>
+<li>在还原时，从S3返回相应的段快照与重做日志流到存储节点</li>
+<li>以并行和异步方式应用重做日志流到段快照</li>
+</ul>
+<h3 id="10-3"><strong>10-3 数据库回溯</strong></h3>
+<p><strong>PITR  Point-in-time recovery</strong></p>
+<p>通过情况下，所谓的从删除库到跑路，<strong>传统的方式从备份中，恢复数据库</strong>，恢复到一个时间点。把误操作的对象导出来放到新库里，时间会很长</p>
+<p>Aurora的配置不是简单的块设备，它的数据存储其实是按照version存储数据，误操作的时候块数据并没有被磨掉，它只是被设置成对实例不可见了，数据库回溯更多的是更改的原数据metadata的状态,所以数据块还存在，只是可见和不可见的转变，时间很快，通常10s以内</p>
+<p><img alt="Alt Image Text" src="../../images/aua1_24.png" title="Body image" /></p>
+<ul>
+<li>
+<p><strong>回溯机制代表将数据库恢复至某一时间点，无需使用备份资源</strong></p>
+<ul>
+<li>在有DML或者DDL误操作的情况下，回溯可以回到过去时间点。</li>
+<li>回溯不是破坏性的，可以多次回溯到正确的时间点。</li>
+</ul>
+</li>
+<li>
+<p>不需要像传统数据库利用备份还原和日志恢复到某一时间点</p>
+</li>
+<li>
+<p>When you enable Aurora Backtrack in the RDS management console, <strong>you specify how long to retain data records, and you pay for the space these records use. For example, you could set up Backtrack to allow you to move your database up to 72 hours back.</strong></p>
+</li>
+<li>
+<p>存储会增加，页面为了保证回溯的速度，不能那么快被回收，放在上面，可见性有变化</p>
+</li>
+</ul>
+<h3 id="10-4-caches"><strong>10-4 存活 caches</strong></h3>
+<ul>
+<li>数据库缓存和后台进程是独立出来的</li>
+<li>数据库重启进程时，缓存是不会重启的，这样可以保证访问效率</li>
+<li>
+<p>缓存可以在重启时，任然保存热数据，不需要第二次缓存的加热了</p>
+</li>
+<li>
+<p><strong>将cache从数据库进程中分离出来</strong> </p>
+</li>
+<li><strong>数据库重启时Cache可以依旧保持热度</strong></li>
+<li>更快地恢复全量加载载操作 </li>
+<li>实例崩溃恢复＋可存活 cache = 更快速容易地从DB失败中恢复 </li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_25.png" title="Body image" /></p>
+<p><strong>Caching process和 DB process 分离开来并在数据库重启时保持warm</strong></p>
+<h3 id="10-5"><strong>10-5 即时崩溃重做恢复</strong></h3>
+<p><strong>传统数据库</strong></p>
+<ul>
+<li>重放自上次检查点之后的日志 (undo log)</li>
+<li>在单线程中慢速重放 </li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_26.png" title="Body image" /></p>
+<p><strong>Amazon Aurora</strong></p>
+<ul>
+<li>无需检查点 （没有检查点）</li>
+<li>无需重放启动准备 </li>
+</ul>
+<p><strong>异步的方式判断segment是否需要恢复，如过需要恢复多个存储点，多个segment异步的方式进行恢复</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua1_28.png" title="Body image" /></p>
+<h3 id="10-6"><strong>10-6 读取副节点与快速故障转移</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_27.png" title="Body image" /></p>
+<ul>
+<li><strong>在多可用区内最多可提供15份可升级的只读副本</strong></li>
+<li>副节点与主节点共享存储——不丢失数据</li>
+<li>可配置故障转移顺序</li>
+</ul>
+<h3 id="10-7-15"><strong>10-7 多达15个可提升的只读副本</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_29.png" title="Body image" /></p>
+<ul>
+<li>多达15个跨多个可用区的只读副本，<strong>自动故障转移</strong>，通常小于 30秒</li>
+<li>基于重做日志的复制，低延时 – 通常小于 10 毫秒</li>
+<li><strong>只读访问端点</strong>具备<strong>负载均衡</strong>和<strong>自动伸缩的能力</strong></li>
+</ul>
+<h3 id="10-8-aurora"><strong>10-8 Aurora数据库克隆技术</strong></h3>
+<p>克隆数据库而不复制数据 =&gt; 可以很快创建一个clone</p>
+<p><img alt="Alt Image Text" src="../../images/aua1_30.png" title="Body image" /></p>
+<ul>
+<li>瞬间创建一个数据库克隆<ul>
+<li><strong>快的原因是并不会拷贝原数据库中的数据吗，而只是很快速的生成指针</strong> </li>
+<li>克隆数据库并不包含数据，而是包含一堆指针。当用户访问原数据库是是通过指针去访问原数据库中的数据</li>
+<li>当源数据库发生改变时，源数据里的数据保留不变，<strong>被修改的数据块拷贝一份出来，在拷贝出来的数据快做修改</strong></li>
+<li><strong>对于克隆数据来说，始终可以看到创建克隆数据库时源数据快中的内容</strong> 比如9点创建的克隆，可以看到静态的九点钟创建的克隆的内容</li>
+<li>源库的变化不会影响源数据文件，是会拷贝一个新的数据块</li>
+<li>对克隆库修改时，也是对源数据进行拷贝，进行修改</li>
+</ul>
+</li>
+<li>仅在发生写入时复制数据(COW) – 当原始数据和克隆卷数据不同时</li>
+</ul>
+<p><strong>应用场景</strong></p>
+<ul>
+<li>克隆生产数据库以运行测试</li>
+<li>数据库重组</li>
+<li>为分析提供一个时间点快照，不影响生产环境，可以产生一个用于分析的静态内容</li>
+</ul>
+<h3 id="10-9"><strong>10-9 全球数据库更快的灾难恢复速度与数据位置强化</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/aua1_31.png" title="Body image" /></p>
+<p>Aurora 支持一个叫做Gloal DB的功能，依托于AWS的全球骨干网络，可以快速的，让我们不同的region里的从节点去和主节点进行数据的同步</p>
+<p>数据的同步并不是通过binlog的方式，而是通过redolog的方式进行数据同步,<strong>从节点和主节点的延迟是个位数秒级为单位</strong></p>
+<h2 id="11-aurora"><strong>11、 Aurora 新特性</strong></h2>
+<h3 id="11-1-aurora-multi-master"><strong>11-1 Aurora Multi-Master</strong></h3>
+<p>通过使用Amazon Aurora Multi-Master，可以在多个可用区中创建多个读取/写入主实例。应用程序就可以在集群的多个数据库实例中读取和写入数据，就像目前可以在只读副本中读取一样。</p>
+<p><img alt="Alt Image Text" src="../../images/aua1_35.png" title="Body image" /></p>
+<ul>
+<li>来自任何实例失败的应用程序零停机时间</li>
+<li>可用区A故障不会导致应用程序停机</li>
+<li>更快的写入性能和更高的规模</li>
+<li>更强大的扩展能力</li>
+</ul>
+<p><a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-multi-master.html#aurora-multi-master-overview">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-multi-master.html#aurora-multi-master-overview</a></p>
+<ul>
+<li>In a multi-master cluster, all DB instances can perform write operations. 、</li>
+<li>The notions of a single read/write primary instance and multiple read-only Aurora Replicas don't apply. </li>
+<li>There isn't any failover when a writer DB instance becomes unavailable, because another writer DB instance is immediately available to take over the work of the failed instance</li>
+</ul>
+<p><strong>Currently, multi-master clusters require Aurora MySQL version 1, which is compatible with MySQL 5.6. When specifying the DB engine version in the AWS Management Console, AWS CLI, or RDS API, choose 5.6.10a.</strong></p>
+<p>Multi-master clusters have no dedicated read-only nodes. </p>
+<ul>
+<li>Multi-master clusters keep track of all changes to data within all database instances. The unit of measurement is the data page, which has a fixed size of 16 KB</li>
+<li>If two DB instances attempt to modify the same data page at almost the same instant, a write conflict occurs. The earliest change request is approved using a quorum voting mechanism。 That change is saved to permanent storage.</li>
+<li>The DB instance whose change isn't approved rolls back the entire transaction containing the attempted change. Rolling back the transaction ensures that data is kept in a consistent state, and applications always see a predictable view of the data</li>
+</ul>
+<h4 id="11-1-recommended-workloads-for-multi-master-clusters">11-1 Recommended workloads for multi-master clusters</h4>
+<p><strong>Active-passive workloads</strong></p>
+<p>With an active-passive workload, you perform all read and write operations on one DB instance at a time. You hold any other DB instances in the Aurora cluster in reserve. If the original active DB instance becomes unavailable, you immediately switch all read and write operations to the other DB instance. With this configuration, you minimize any downtime for write operations.</p>
+<p><strong>Active-active workloads</strong></p>
+<p>With an active-active workload, you perform read and write operations to all the DB instances at the same time. </p>
+<p>In this configuration, <strong>you typically segment the workload so that the different DB instances don't modify the same underlying data at the same time</strong>. Doing so minimizes the chance for write conflicts.</p>
+<p>Multi-master clusters work well with application logic that's designed for a segmented workload. </p>
+<p>In this type of workload, you divide write operations by database instance, database, table, or table partition</p>
+<p>For example, you can run multiple applications on the same cluster, each assigned to a specific DB instance. Alternatively, you can run an application that uses multiple small tables, such as one table for each user of an online service. Ideally, you design your schema so that write operations for different DB instances don't perform simultaneous updates to overlapping rows within the same tables.</p>
+<h3 id="11-2-auroraserverless"><strong>11-2 Aurora无服务器架构(Serverless)</strong></h3>
+<p>Serverless 是一种面向 Aurora 的按需扩展配置，数据库将根据您的应用程序的需求来自动启动、 关闭以及纵向和横向扩展数据库容量。可在云中运行关系数据库，而无需管理数据库实例或集群</p>
+<ul>
+<li>可以在2-3秒 将数据库拉起来</li>
+<li>
+<p>无缝的弹性扩展</p>
+</li>
+<li>
+<p>按需自动启停</p>
+</li>
+<li>无服务器化、自动扩展</li>
+<li>使用的资源按秒付费</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_36.png" title="Body image" /></p>
+<h3 id="11-3"><strong>11-3 并行查询</strong></h3>
+<ul>
+<li>将查询处理下移至 Aurora 存储层</li>
+<li>跨数百个甚至数千个存储节点并行运行查询</li>
+<li>减少了对网络、CPU 和缓冲池资源的争夺</li>
+<li>提高了大型分析查询的性能</li>
+</ul>
+<p>While some databases can parallelize query processing across CPUs in one or a handful of servers, <strong>Parallel Query takes advantage of Aurora’s unique architecture to push down and parallelize query processing across thousands of CPUs in the Aurora storage layer</strong>. By offloading analytical query processing to the Aurora storage layer, Parallel Query reduces network, CPU, and buffer pool contention with the transactional workload.</p>
+<p><img alt="Alt Image Text" src="../../images/aua1_37.png" title="Body image" /></p>
+<h3 id="11-4-aurora"><strong>11-4 Aurora全球同库跨区域多主节点</strong></h3>
+<ul>
+<li>应用跨全球分部，一个数据库跨全球的高效的访问</li>
+<li>每个节点跨区域的写入</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua1_38.png" title="Body image" /></p>
+<ul>
+<li>本地写 </li>
+<li>乐观锁并发控制 —— 没有分布式锁管理器与全局锁管理协议 </li>
+<li>分层冲突处理 —— 主节点、存储节点、可用区、区域级别仲裁，当无或低冲突级别时性能扩展</li>
+</ul>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021-9999 Jacob Xi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>

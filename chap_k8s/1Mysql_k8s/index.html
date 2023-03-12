@@ -1,0 +1,2594 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      
+        <link rel="prev" href="../../aurora/3Aurora_operation/">
+      
+      
+        <link rel="next" href="../2mysql_Master_slave/">
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>第一节 Kubernetes 部署 MySQL 主从服务 - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#kubernetes-mysql" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第一节 Kubernetes 部署 MySQL 主从服务
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          MySQL 基础篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql1_innodb/" class="md-nav__link">
+        第七节 "Shallow Dive" MySQL 和 InnoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql3_transaction/" class="md-nav__link">
+        第八节 "Shallow Dive" MySQL 中事务的实现(`transaction`)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql2_index/" class="md-nav__link">
+        第九节 "Shallow Dive" MySQL 索引设计概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql5_btree/" class="md-nav__link">
+        第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql_bia_review/" class="md-nav__link">
+        MySQL 基础知识复习
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          MySQL 实战篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 实战篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/1table_design/" class="md-nav__link">
+        L1 表结构设计篇 - 数据类型
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/2table_design/" class="md-nav__link">
+        L2 表结构设计篇 - 表设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/3table_index/" class="md-nav__link">
+        L3 索引优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/4table_query/" class="md-nav__link">
+        L4 查询优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/5db_perf_replica/" class="md-nav__link">
+        L5 高可用架构 - MySQL 复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/6db_ha/" class="md-nav__link">
+        L6 MySQL高可用架构
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/7Dist_db/" class="md-nav__link">
+        L7 分布式架构篇
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/9Mysql_copy/" class="md-nav__link">
+        L8 MySQL的零拷贝技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/8opt_int/" class="md-nav__link">
+        L8 Operation Interview
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          AWS Aurora 技术与实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          MySQL on K8S
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          第一节 Kubernetes 部署 MySQL 主从服务
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    一、本地存储原理
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storageclass" class="md-nav__link">
+    二、创建 StorageClass
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#namespace" class="md-nav__link">
+    三、创建Namespace
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configmap-masterslave" class="md-nav__link">
+    四、使用 ConfigMap 为 Master/Slave 节点分配不同的配置文件
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mysqlsecret" class="md-nav__link">
+    五、创建mysql密码Secret
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-mysql" class="md-nav__link">
+    六、使用 Service 为 MySQL 提供读写分离
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statefulset-mysql" class="md-nav__link">
+    七、使用 StatefulSet 搭建 MySQL 主从集群
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    服务验证
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    扩展从节点
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2mysql_Master_slave/" class="md-nav__link">
+        第二节 在K8s中部署主从结构的MySQL服务
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          MySQL 基础操作篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础操作篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/1db_intro/" class="md-nav__link">
+        第一节 数据库简介、及常用数据库介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/2db_install/" class="md-nav__link">
+        第二节 安装 MySQL Repository & Jam db install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/3db_sql/" class="md-nav__link">
+        第三节 结构化查询语言 SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/4db_sql_ops1/" class="md-nav__link">
+        第四节 MySQL 操作实例(上)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/5db_sql_ops2/" class="md-nav__link">
+        第五节 MySQL 操作实例(中)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/6db_sql_ops3/" class="md-nav__link">
+        第六节 Mysql操作实例(下)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/7db_type/" class="md-nav__link">
+        第七节 MySQL 数据类型约束
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/8db_index/" class="md-nav__link">
+        第八节 MySQL 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/9db_mgt/" class="md-nav__link">
+        第九节 MySQL 的用户管理和权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/10db_logs/" class="md-nav__link">
+        第十节 MySQL 日志管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/11db_backup/" class="md-nav__link">
+        第十一节 MySQL备份概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/13db_xtrabackup/" class="md-nav__link">
+        第十二节 MySQL逻辑备份mysqldump
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/14mysql_replicate/" class="md-nav__link">
+        第十四节 MySQL 主从复制原理介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/15mysql_master_slave/" class="md-nav__link">
+        第十五节 MySQL 传统主从同步配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/16mysq_gtid/" class="md-nav__link">
+        第十六节 MySQL 基于 GTID 的主从复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/17ops_review/" class="md-nav__link">
+        Mysql OPS Review
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/18review_short/" class="md-nav__link">
+        SQL操作精简版
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          MongoDB 操作实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 操作实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/1mongodb_intro/" class="md-nav__link">
+        1 MongoDB介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/2mongodb_install/" class="md-nav__link">
+        2 MongoDB 快速安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/3mongodb_k8s_cluster/" class="md-nav__link">
+        3 在 Kubernetes 上编排 MongoDB 集群
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/4mongodb_opt/" class="md-nav__link">
+        4 MongoDB文档操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/5mongodb_springbboot/" class="md-nav__link">
+        5 MongoDB整合SpringBoot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/6mongodb_pip/" class="md-nav__link">
+        6 MongoDB 聚合操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/7mongodb_pip2/" class="md-nav__link">
+        7 MongoDB聚合操作高级操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/8mongodb_view/" class="md-nav__link">
+        8 MongoDB视图
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/9mongodb_index/" class="md-nav__link">
+        9 MongoDB索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/10mongodb_index_adv/" class="md-nav__link">
+        10 索引属性
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/11mongodb_explain/" class="md-nav__link">
+        11 explain执行计划详解
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          MongoDB 高级实战教程(全)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 高级实战教程(全)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/1mon_intro_install/" class="md-nav__link">
+        1 认识文档数据库 MongoDB & 及数据安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/2mon_command/" class="md-nav__link">
+        2 MongoDB 基本操作及聚合操作实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/3mon_rep/" class="md-nav__link">
+        3 复制集机制及原理 & 实现
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/4mon_tools/" class="md-nav__link">
+        4 MongoDB 全家桶
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/5mon_design/" class="md-nav__link">
+        5 Mongo 模型设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/6mon_red_write/" class="md-nav__link">
+        6 MongoDB 事务开发
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/7mon_changestream_bestdesign/" class="md-nav__link">
+        7 MongoDB Change Stream & 开发最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/8mon_shard/" class="md-nav__link">
+        8 Mongo Shards分片技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/9mon_monitor/" class="md-nav__link">
+        9 MongoDB 监控最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/10mon_bakup_restore/" class="md-nav__link">
+        10 MongoDB 备份与恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/11mon_sec/" class="md-nav__link">
+        11 MongoDB 安全设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/12mon_index/" class="md-nav__link">
+        12 MongoDB 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/13mon_perf/" class="md-nav__link">
+        13 MongoDB 性能
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/14mon_cluster/" class="md-nav__link">
+        14 高级集群设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/15mon_goonline/" class="md-nav__link">
+        15 MongoDB上线及升级
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/16mon_sample/" class="md-nav__link">
+        16 MongoDB 应用实例和场景
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/17mon_dms/" class="md-nav__link">
+        17 数据迁移
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/18mon_spark/" class="md-nav__link">
+        18 MongoDB + Spark实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/19mon_sql/" class="md-nav__link">
+        19 MongoDB SQL 套接件
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/20MongoDB_mico_middle_service/" class="md-nav__link">
+        20 MongoDB 与微服务 & 数据中台
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          PostgresSQL 12.6运维入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          PostgresSQL 12.6运维入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/2pg_intall/" class="md-nav__link">
+        1 PostgreSQL介绍&安装&链接管理&用户权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/3pg_cmd/" class="md-nav__link">
+        2 常用基础命令介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_logs/" class="md-nav__link">
+        3 Online WAL[Write Head Log]日志（redo)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_stru/" class="md-nav__link">
+        4 体系结构介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/5pg_bak/" class="md-nav__link">
+        5 备份恢复恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/6pg_repl/" class="md-nav__link">
+        6 Master-Slave流复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/7pg_ops/" class="md-nav__link">
+        7 有用的系统函数
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/1pg_int/" class="md-nav__link">
+        PostgreSQL Interview Questions 2022
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          AWS DB OTHERs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          AWS DB OTHERs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/1aws_neptune/" class="md-nav__link">
+        L1 深入了解 Amazon Neptune 图数据库技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/2dydb1/" class="md-nav__link">
+        L2 分布式键值存储 Dynamo 的实现原理
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          Extra 知识扩展
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    一、本地存储原理
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#storageclass" class="md-nav__link">
+    二、创建 StorageClass
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#namespace" class="md-nav__link">
+    三、创建Namespace
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configmap-masterslave" class="md-nav__link">
+    四、使用 ConfigMap 为 Master/Slave 节点分配不同的配置文件
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mysqlsecret" class="md-nav__link">
+    五、创建mysql密码Secret
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#service-mysql" class="md-nav__link">
+    六、使用 Service 为 MySQL 提供读写分离
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statefulset-mysql" class="md-nav__link">
+    七、使用 StatefulSet 搭建 MySQL 主从集群
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    服务验证
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    扩展从节点
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="kubernetes-mysql"><strong>第一节 Kubernetes 部署 MySQL 主从服务</strong></h1>
+<p><img alt="Alt Image Text" src="../../images/1k8s_1.png" title="Body image" /></p>
+<p>一般情况下 Kubernetes 可以通过 ReplicaSet 以一个 Pod 模板创建多个 pod 副本，但是它们都是无状态的，任何时候它们都可以被一个全新的 pod 替换。然而有状态的 pod 需要另外的方案确保当一个有状态的 pod 挂掉后，<strong>这个 pod 实例需要在别的节点上重建，但是新的实例必须与被替换的实例拥有相同的名称、网络标识和状态。这就是 Statefulset 管理 pod 的手段。</strong></p>
+<p><strong>对于容器集群，有状态服务的挑战在于，通常集群中的任何节点都并非100%可靠的，服务所需的资源也会动态地更新改变。</strong></p>
+<p>当节点由于故障或服务由于需要更多的资源而无法继续运行在原有节点上时，集群管理系统会为该服务重新分配一个新的运行位置，从而确保从整体上看，集群对外的服务不会中断。若采用本地存储，当服务漂移后数据并不会随着服务转移到新的节点，重启服务就会出现数据丢失的困境。</p>
+<p>本文目的是通过一个 mysql 的主从集群搭建，深入了解 kubernetes 的 statfulset 管理。</p>
+<p><strong>为了降低实验的外部依赖，存储层面上，我采用的是本地存储，当然生产上不建议这样做，生产环境的存储推荐官方介绍到的的 gce、nfs、ceph等存储方案</strong>，因为这些方案支持动态供给的特性，允许开发人员通过 pvc 的定义，快速实现数据有效存储，所以你绝不应该把一个宿主机上的目录当作 PV 使用， 只是本文用于实验需要，<strong>采用 Local Persistent Volume 的手段，目的只是为了验证 Statefulset 的状态管理功能。</strong></p>
+<p>实验环境</p>
+<ul>
+<li>kubernetes Master</li>
+<li>kubernetes Node（测试演示，所有的副本都会在其上运行）</li>
+<li>kubernetes DNS 服务已开启</li>
+</ul>
+<p>实验目的</p>
+<ul>
+<li>搭建一个主从复制（Master-Slave）的 MySQL 集群</li>
+<li>从节点可以水平扩展</li>
+<li>所有的写操作只能在主节点上执行</li>
+<li>读操作可以在主从节点上执行</li>
+<li>从节点能同步主节点的数据</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/k8s1_2.png" title="Body image" /></p>
+<h2 id="_1"><strong>一、本地存储原理</strong></h2>
+<p>为了快速搭建测试环境，我们这里使用了<strong>本地存储</strong>，也就是说，用户希望 Kubernetes 能够直接使用宿主机上的本地磁盘目录，而不依赖于远程存储服务，来提供<strong>持久化的容器 Volume</strong>。不过这里有个难点：</p>
+<blockquote>
+<p>我们把存储固定在一个节点上，但是pod在调度的时候，是飘来飘去的，怎么能让pod通过pvc也能固定在pv上？</p>
+</blockquote>
+<p><strong>给这个 Pod 加上一个 nodeAffinity 行不行？</strong></p>
+<p>当然行，但是这变相破坏了开发人员对资源对象的定义规范了，开发人员应该不需要时刻考虑调度的细节。<strong>调度的改动应该交给运维就行。所以我们为了实现本地存储，我们采用了 <code>延迟绑定</code> 的方法。</strong></p>
+<p>方法很简单，我们都知道 <code>storageclass</code> 一般由运维人员设计，我们只需要在<code>storageclass</code>指定 <code>no-provisioner</code>。</p>
+<p>这是因为 <code>Local Persistent Volume</code> 目前尚不支持 <code>Dynamic Provisioning</code>，所以它没办法在用户创建 <code>PVC</code> 的时候，就自动创建出对应的 <code>PV</code>。</p>
+<p><strong><span style="color:red">与此同时，这个 <code>StorageClass</code> 还定义了一个 <code>volumeBindingMode=WaitForFirstConsumer</code>的属性。它是<code>Local Persistent Volume</code> 里一个非常重要的特性，即：延迟绑定</span></strong></p>
+<pre><code>kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+</code></pre>
+<p>实验步骤</p>
+<p><strong>先在node （实验用的node节点IP是<code>172.31.170.51</code> ）节点上，预先分配几个pv (不建议在生产上这样操作)</strong></p>
+<p><strong><code>01-persistentVolume-1.yaml</code></strong></p>
+<pre><code>apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-mysql-pv
+spec:
+  capacity:
+    storage: 15Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /data/svr/projects/mysql
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - 172.31.170.51
+</code></pre>
+<p><strong><code>01-persistentVolume-2.yaml</code></strong></p>
+<pre><code>apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-mysql-pv-2
+spec:
+  capacity:
+    storage: 15Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /data/svr/projects/mysql2
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - 172.31.170.51
+</code></pre>
+<p><strong><code>01-persistentVolume-3.yaml</code></strong></p>
+<pre><code>apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: example-mysql-pv-3
+spec:
+  capacity:
+    storage: 15Gi
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /data/svr/projects/mysql3
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - 172.31.170.51
+</code></pre>
+<p>记住，这是在生产上不推荐的做法，我只是实验用途才这样手动预先创建，正规的做法应该通过storageclass采用 <code>Dynamic Provisioning</code>， 而不是 <code>Static Provisioning</code> 机制生产PV。</p>
+<pre><code>kubectl apply -f 01-persistentVolume-{1..3}.yaml
+
+persistentvolume/example-mysql-pv1 created
+persistentvolume/example-mysql-pv2 created
+persistentvolume/example-mysql-pv3 created
+</code></pre>
+<h2 id="storageclass"><strong>二、创建 StorageClass</strong></h2>
+<p><strong>02-storageclass.yaml</strong></p>
+<pre><code>kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+</code></pre>
+<p>执行创建</p>
+<pre><code>kubectl apply -f 02-storageclass.yaml
+
+storageclass.storage.k8s.io/local-storage created
+</code></pre>
+<h2 id="namespace"><strong>三、创建Namespace</strong></h2>
+<pre><code>apiVersion: v1
+kind: Namespace
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+</code></pre>
+<p>执行创建</p>
+<pre><code>kubectl apply -f 03-mysql-namespace.yaml
+
+namespace/mysql created
+</code></pre>
+<h2 id="configmap-masterslave"><strong>四、使用 ConfigMap 为 Master/Slave 节点分配不同的配置文件</strong></h2>
+<p><strong><code>04-mysql-configmap.yaml</code></strong></p>
+<pre><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql
+  namespace: mysql
+  labels:
+    app: mysql
+data:
+  master.cnf: |
+    # Master配置
+    [mysqld]
+    log-bin=mysqllog
+    skip-name-resolve
+  slave.cnf: |
+    # Slave配置
+    [mysqld]
+    super-read-only
+    skip-name-resolve
+    log-bin=mysql-bin
+    replicate-ignore-db=mysql
+</code></pre>
+<p>创建执行</p>
+<pre><code>kubectl apply -f 04-mysql-configmap.yaml
+
+configmap/mysql created
+</code></pre>
+<h2 id="mysqlsecret"><strong>五、创建mysql密码Secret</strong></h2>
+<p><strong><code>05-mysql-secret.yaml</code></strong></p>
+<pre><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-secret
+  namespace: mysql
+  labels:
+    app: mysql
+type: Opaque
+data:
+  password: MTIzNDU2 # echo -n &quot;123456&quot; | base64
+</code></pre>
+<pre><code>kubectl apply -f 05-mysql-secret.yaml
+
+secret/mysql-secret created
+</code></pre>
+<h2 id="service-mysql"><strong>六、使用 Service 为 MySQL 提供读写分离</strong></h2>
+<p><code>06-mysql-services.yaml</code></p>
+<pre><code>apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: mysql
+  labels:
+    app: mysql
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+  clusterIP: None
+  selector:
+    app: mysql
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-read
+  namespace: mysql
+  labels:
+    app: mysql
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+  selector:
+    app: mysql
+</code></pre>
+<p>用户所有写请求，必须以 DNS 记录的方式直接访问到 Master 节点，也就是 <code>mysql-0.mysql</code>这条 DNS 记录。</p>
+<p>用户所有读请求，必须访问自动分配的 DNS 记录可以被转发到任意一个 <code>Master</code> 或 <code>Slave</code> 节点上，也就是 <code>mysql-read</code>这条 DNS 记录</p>
+<pre><code>kubectl apply -f 06-mysql-services.yaml
+
+$ kubectl get svc -n mysql
+NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)    AGE
+mysql        ClusterIP   None         &lt;none&gt;        3306/TCP   20s
+mysql-read   ClusterIP   10.0.0.63    &lt;none&gt;        3306/TCP   20s
+</code></pre>
+<h2 id="statefulset-mysql"><strong>七、使用 StatefulSet 搭建 MySQL 主从集群</strong></h2>
+<p><strong><code>07-mysql-statefulset.yaml</code></strong></p>
+<pre><code>apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: mysql
+  labels:
+    app: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  serviceName: mysql
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      initContainers:
+      - name: init-mysql
+        image: mysql:5.7
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        command:
+        - bash
+        - &quot;-c&quot;
+        - |
+          set -ex
+          # 从 Pod 的序号，生成 server-id
+          [[ $(hostname) =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          echo [mysqld] &gt; /mnt/conf.d/server-id.cnf
+          # 由于 server-id 不能为 0，因此给 ID 加 100 来避开它
+          echo server-id=$((100 + $ordinal)) &gt;&gt; /mnt/conf.d/server-id.cnf
+          # 如果 Pod 的序号为 0，说明它是 Master 节点，从 ConfigMap 里把 Master 的配置文件拷贝到 /mnt/conf.d 目录下
+          # 否则，拷贝 ConfigMap 里的 Slave 的配置文件
+          if [[ ${ordinal} -eq 0 ]]; then
+            cp /mnt/config-map/master.cnf /mnt/conf.d
+          else
+            cp /mnt/config-map/slave.cnf /mnt/conf.d
+          fi
+        volumeMounts:
+        - name: conf
+          mountPath: /mnt/conf.d
+        - name: config-map
+          mountPath: /mnt/config-map
+      - name: clone-mysql
+        image: gcr.io/google-samples/xtrabackup:1.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        command:
+        - bash
+        - &quot;-c&quot;
+        - |
+          set -ex
+          # 拷贝操作只需要在第一次启动时进行，所以数据已经存在则跳过
+          [[ -d /var/lib/mysql/mysql ]] &amp;&amp; exit 0
+          # Master 节点（序号为 0）不需要这个操作
+          [[ $(hostname) =~ -([0-9]+)$ ]] || exit 1
+          ordinal=${BASH_REMATCH[1]}
+          [[ $ordinal == 0 ]] &amp;&amp; exit 0
+          # 使用 ncat 指令，远程地从前一个节点拷贝数据到本地
+          ncat --recv-only mysql-$(($ordinal-1)).mysql 3307 | xbstream -x -C /var/lib/mysql
+          # 执行 --prepare，这样拷贝来的数据就可以用作恢复了
+          xtrabackup --prepare --target-dir=/var/lib/mysql
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+          subPath: mysql
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        env:
+#        - name: MYSQL_ALLOW_EMPTY_PASSWORD
+#          value: &quot;1&quot;
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        ports:
+        - name: mysql
+          containerPort: 3306
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+          subPath: mysql
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        livenessProbe:
+          exec:
+            command: [&quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-uroot&quot;, &quot;-p${MYSQL_ROOT_PASSWORD}&quot;]
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command: [&quot;mysqladmin&quot;, &quot;ping&quot;, &quot;-uroot&quot;, &quot;-p${MYSQL_ROOT_PASSWORD}&quot;]
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1
+      - name: xtrabackup
+        image: gcr.io/google-samples/xtrabackup:1.0
+        ports:
+        - name: xtrabackup
+          containerPort: 3307
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+        command:
+        - bash
+        - &quot;-c&quot;
+        - |
+          set -ex
+          cd /var/lib/mysql
+          # 从备份信息文件里读取 MASTER_LOG_FILE 和 MASTER_LOG_POS 这 2 个字段的值，用来拼装集群初始化 SQL
+          if [[ -f xtrabackup_slave_info ]]; then
+            # 如果 xtrabackup_slave_info 文件存在，说明这个备份数据来自于另一个 Slave 节点
+            # 这种情况下，XtraBackup 工具在备份的时候，就已经在这个文件里自动生成了 &quot;CHANGE MASTER TO&quot; SQL 语句
+            # 所以，只需要把这个文件重命名为 change_master_to.sql.in，后面直接使用即可
+            mv xtrabackup_slave_info change_master_to.sql.in
+            # 所以，也就用不着 xtrabackup_binlog_info 了
+            rm -f xtrabackup_binlog_info
+          elif [[ -f xtrabackup_binlog_info ]]; then
+            # 如果只是存在 xtrabackup_binlog_info 文件，说明备份来自于 Master 节点，就需要解析这个备份信息文件，读取所需的两个字段的值
+            [[ $(cat xtrabackup_binlog_info) =~ ^(.*?)[[:space:]]+(.*?)$ ]] || exit 1
+            rm xtrabackup_binlog_info
+            # 把两个字段的值拼装成 SQL，写入 change_master_to.sql.in 文件
+            echo &quot;CHANGE MASTER TO MASTER_LOG_FILE='${BASH_REMATCH[1]}',\
+                  MASTER_LOG_POS=${BASH_REMATCH[2]}&quot; &gt; change_master_to.sql.in
+          fi
+          # 如果存在 change_master_to.sql.in，就意味着需要做集群初始化工作
+          if [[ -f change_master_to.sql.in ]]; then
+            # 但一定要先等 MySQL 容器启动之后才能进行下一步连接 MySQL 的操作
+            echo &quot;Waiting for mysqld to be ready（accepting connections）&quot;
+            until mysql -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD} -e &quot;SELECT 1&quot;; do sleep 1; done
+            echo &quot;Initializing replication from clone position&quot;
+            # 将文件 change_master_to.sql.in 改个名字
+            # 防止这个 Container 重启的时候，因为又找到了 change_master_to.sql.in，从而重复执行一遍初始化流程
+            mv change_master_to.sql.in change_master_to.sql.orig
+            # 使用 change_master_to.sql.orig 的内容，也就是前面拼装的 SQL，组成一个完整的初始化和启动 Slave 的 SQL 语句
+            mysql -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD} &lt;&lt; EOF
+          $(&lt; change_master_to.sql.orig),
+            MASTER_HOST='mysql-0.mysql.mysql',
+            MASTER_USER='root',
+            MASTER_PASSWORD='${MYSQL_ROOT_PASSWORD}',
+            MASTER_CONNECT_RETRY=10;
+          START SLAVE;
+          EOF
+          fi
+          # 使用 ncat 监听 3307 端口。
+          # 它的作用是，在收到传输请求的时候，直接执行 xtrabackup --backup 命令，备份 MySQL 的数据并发送给请求者
+          exec ncat --listen --keep-open --send-only --max-conns=1 3307 -c \
+            &quot;xtrabackup --backup --slave-info --stream=xbstream --host=127.0.0.1 --user=root --password=${MYSQL_ROOT_PASSWORD}&quot;
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/mysql
+          subPath: mysql
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+      volumes:
+      - name: conf
+        emptyDir: {}
+      - name: config-map
+        configMap:
+          name: mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - &quot;ReadWriteOnce&quot;
+      storageClassName: local-storage
+      resources:
+        requests:
+          storage: 3Gi
+</code></pre>
+<p><strong>整体的<code>statefulset</code>有两个<code>replicas</code>，一个<code>Master</code>, 一个<code>Slave</code>，然后使用<code>init-mysql</code> 这个 <code>initContainers</code> 进行配置文件的初始化。</strong></p>
+<p><strong>接着使用 <code>clone-mysql</code> 这个 <code>initContainers</code> 进行数据的传输；同时使用 <code>xtrabackup</code> 这个 sidecar 容器进行SQL初始化和数据传输功能</strong></p>
+<p>创建 StatefulSet</p>
+<pre><code>kubectl apply -f 07-mysql-statefulset.yaml
+
+$ kubectl get po -n mysql
+NAME      READY   STATUS    RESTARTS   AGE
+mysql-0   2/2     Running   0          70s
+mysql-1   0/2     Pending   0          5s
+</code></pre>
+<p>可以看到，StatefulSet 启动成功后，会有两个Pod运行。</p>
+<p>接下来，我们可以尝试向这个MySQL集群发起请求，执行一些SQL操作来验证它是否正常</p>
+<h2 id="_2">服务验证</h2>
+<p>验证主从状态</p>
+<pre><code>kubectl -n mysql exec mysql-1 -c mysql -- bash -c &quot;mysql -uroot -p123456 -e 'show slave status \G'&quot;
+
+
+mysql: [Warning] Using a password on the command line interface can be insecure.
+*************************** 1. row ***************************
+               Slave_IO_State: Waiting for master to send event
+                  Master_Host: mysql-0.mysql.mysql
+                  Master_User: root
+                  Master_Port: 3306
+                Connect_Retry: 10
+              Master_Log_File: mysqllog.000003
+          Read_Master_Log_Pos: 154
+               Relay_Log_File: mysql-1-relay-bin.000002
+                Relay_Log_Pos: 319
+        Relay_Master_Log_File: mysqllog.000003
+             Slave_IO_Running: Yes
+            Slave_SQL_Running: Yes
+              Replicate_Do_DB: 
+          Replicate_Ignore_DB: mysql
+           Replicate_Do_Table: 
+       Replicate_Ignore_Table: 
+      Replicate_Wild_Do_Table: 
+  Replicate_Wild_Ignore_Table: 
+                   Last_Errno: 0
+                   Last_Error: 
+                 Skip_Counter: 0
+          Exec_Master_Log_Pos: 154
+              Relay_Log_Space: 528
+              Until_Condition: None
+               Until_Log_File: 
+                Until_Log_Pos: 0
+           Master_SSL_Allowed: No
+           Master_SSL_CA_File: 
+           Master_SSL_CA_Path: 
+              Master_SSL_Cert: 
+            Master_SSL_Cipher: 
+               Master_SSL_Key: 
+        Seconds_Behind_Master: 0
+Master_SSL_Verify_Server_Cert: No
+                Last_IO_Errno: 0
+                Last_IO_Error: 
+               Last_SQL_Errno: 0
+               Last_SQL_Error: 
+  Replicate_Ignore_Server_Ids: 
+             Master_Server_Id: 100
+                  Master_UUID: 1bad4d64-6290-11ea-8376-0242ac113802
+             Master_Info_File: /var/lib/mysql/master.info
+                    SQL_Delay: 0
+          SQL_Remaining_Delay: NULL
+      Slave_SQL_Running_State: Slave has read all relay log; waiting for more updates
+           Master_Retry_Count: 86400
+                  Master_Bind: 
+      Last_IO_Error_Timestamp: 
+     Last_SQL_Error_Timestamp: 
+               Master_SSL_Crl: 
+           Master_SSL_Crlpath: 
+           Retrieved_Gtid_Set: 
+            Executed_Gtid_Set: 
+                Auto_Position: 0
+         Replicate_Rewrite_DB: 
+                 Channel_Name: 
+           Master_TLS_Version:
+</code></pre>
+<p>接下来，我们通过Master容器创建数据库和表、插入数据库</p>
+<pre><code>
+kubectl -n mysql exec mysql-0 -c mysql -- bash -c &quot;mysql -uroot -p123456 -e 'create database test’&quot;
+kubectl -n mysql exec mysql-0 -c mysql -- bash -c &quot;mysql -uroot -p123456 -e 'use test;create table counter(c int);’&quot;
+kubectl -n mysql exec mysql-0 -c mysql -- bash -c &quot;mysql -uroot -p123456 -e 'use test;insert into counter values(123)’&quot;
+</code></pre>
+<p>然后，我们观察Slave节点是否都同步到数据了</p>
+<pre><code>kubectl -n mysql exec mysql-1 -c mysql -- bash -c &quot;mysql -uroot -p123456 -e 'use test;select * from counter’&quot;  
+c
+123
+</code></pre>
+<p>当看到输出结果，主从同步正常了</p>
+<h2 id="_3">扩展从节点</h2>
+<p>在有了 StatefulSet 以后，你就可以像 Deployment 那样，非常方便地扩展这个 MySQL 集群，比如</p>
+<pre><code>
+kubectl -n mysql scale statefulset mysql -—replicas=3
+
+$ kubectl get po -n mysql
+NAME      READY   STATUS    RESTARTS   AGE
+mysql-0   2/2     Running   0          22m
+mysql-1   2/2     Running   0          22m
+mysql-2   2/2     Running   0          20s
+</code></pre>
+<p>这时候，一个新的mysql-2就创建出来了，我们继续验证新扩容的节点是否都同步到主节点的数据</p>
+<pre><code>kubectl -n mysql exec mysql-2 -c mysql -- bash -c &quot;mysql -uroot -p123456 -e 'use test;select * from counter’&quot;  
+c
+123
+</code></pre>
+<p>当看到输出结果，主从同步正常了。也就是说从 StatefulSet 为我们新创建的 mysql-2 上，同样可以读取到之前插入的记录。也就是说，我们的数据备份和恢复，都是有效的。</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021-9999 Jacob Xi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>

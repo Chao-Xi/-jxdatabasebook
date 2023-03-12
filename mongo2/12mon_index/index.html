@@ -1,0 +1,2574 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      
+        <link rel="prev" href="../11mon_sec/">
+      
+      
+        <link rel="next" href="../13mon_perf/">
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>12 MongoDB 索引 - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#12-mongodb" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              12 MongoDB 索引
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          MySQL 基础篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql1_innodb/" class="md-nav__link">
+        第七节 "Shallow Dive" MySQL 和 InnoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql3_transaction/" class="md-nav__link">
+        第八节 "Shallow Dive" MySQL 中事务的实现(`transaction`)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql2_index/" class="md-nav__link">
+        第九节 "Shallow Dive" MySQL 索引设计概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql5_btree/" class="md-nav__link">
+        第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql_bia_review/" class="md-nav__link">
+        MySQL 基础知识复习
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          MySQL 实战篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 实战篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/1table_design/" class="md-nav__link">
+        L1 表结构设计篇 - 数据类型
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/2table_design/" class="md-nav__link">
+        L2 表结构设计篇 - 表设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/3table_index/" class="md-nav__link">
+        L3 索引优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/4table_query/" class="md-nav__link">
+        L4 查询优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/5db_perf_replica/" class="md-nav__link">
+        L5 高可用架构 - MySQL 复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/6db_ha/" class="md-nav__link">
+        L6 MySQL高可用架构
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/7Dist_db/" class="md-nav__link">
+        L7 分布式架构篇
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/9Mysql_copy/" class="md-nav__link">
+        L8 MySQL的零拷贝技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/8opt_int/" class="md-nav__link">
+        L8 Operation Interview
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          AWS Aurora 技术与实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          MySQL on K8S
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/2mysql_Master_slave/" class="md-nav__link">
+        第二节 在K8s中部署主从结构的MySQL服务
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          MySQL 基础操作篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础操作篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/1db_intro/" class="md-nav__link">
+        第一节 数据库简介、及常用数据库介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/2db_install/" class="md-nav__link">
+        第二节 安装 MySQL Repository & Jam db install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/3db_sql/" class="md-nav__link">
+        第三节 结构化查询语言 SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/4db_sql_ops1/" class="md-nav__link">
+        第四节 MySQL 操作实例(上)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/5db_sql_ops2/" class="md-nav__link">
+        第五节 MySQL 操作实例(中)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/6db_sql_ops3/" class="md-nav__link">
+        第六节 Mysql操作实例(下)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/7db_type/" class="md-nav__link">
+        第七节 MySQL 数据类型约束
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/8db_index/" class="md-nav__link">
+        第八节 MySQL 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/9db_mgt/" class="md-nav__link">
+        第九节 MySQL 的用户管理和权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/10db_logs/" class="md-nav__link">
+        第十节 MySQL 日志管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/11db_backup/" class="md-nav__link">
+        第十一节 MySQL备份概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/13db_xtrabackup/" class="md-nav__link">
+        第十二节 MySQL逻辑备份mysqldump
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/14mysql_replicate/" class="md-nav__link">
+        第十四节 MySQL 主从复制原理介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/15mysql_master_slave/" class="md-nav__link">
+        第十五节 MySQL 传统主从同步配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/16mysq_gtid/" class="md-nav__link">
+        第十六节 MySQL 基于 GTID 的主从复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/17ops_review/" class="md-nav__link">
+        Mysql OPS Review
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/18review_short/" class="md-nav__link">
+        SQL操作精简版
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          MongoDB 操作实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 操作实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/1mongodb_intro/" class="md-nav__link">
+        1 MongoDB介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/2mongodb_install/" class="md-nav__link">
+        2 MongoDB 快速安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/3mongodb_k8s_cluster/" class="md-nav__link">
+        3 在 Kubernetes 上编排 MongoDB 集群
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/4mongodb_opt/" class="md-nav__link">
+        4 MongoDB文档操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/5mongodb_springbboot/" class="md-nav__link">
+        5 MongoDB整合SpringBoot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/6mongodb_pip/" class="md-nav__link">
+        6 MongoDB 聚合操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/7mongodb_pip2/" class="md-nav__link">
+        7 MongoDB聚合操作高级操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/8mongodb_view/" class="md-nav__link">
+        8 MongoDB视图
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/9mongodb_index/" class="md-nav__link">
+        9 MongoDB索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/10mongodb_index_adv/" class="md-nav__link">
+        10 索引属性
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/11mongodb_explain/" class="md-nav__link">
+        11 explain执行计划详解
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          MongoDB 高级实战教程(全)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 高级实战教程(全)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1mon_intro_install/" class="md-nav__link">
+        1 认识文档数据库 MongoDB & 及数据安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2mon_command/" class="md-nav__link">
+        2 MongoDB 基本操作及聚合操作实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3mon_rep/" class="md-nav__link">
+        3 复制集机制及原理 & 实现
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4mon_tools/" class="md-nav__link">
+        4 MongoDB 全家桶
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5mon_design/" class="md-nav__link">
+        5 Mongo 模型设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6mon_red_write/" class="md-nav__link">
+        6 MongoDB 事务开发
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../7mon_changestream_bestdesign/" class="md-nav__link">
+        7 MongoDB Change Stream & 开发最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../8mon_shard/" class="md-nav__link">
+        8 Mongo Shards分片技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../9mon_monitor/" class="md-nav__link">
+        9 MongoDB 监控最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10mon_bakup_restore/" class="md-nav__link">
+        10 MongoDB 备份与恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11mon_sec/" class="md-nav__link">
+        11 MongoDB 安全设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          12 MongoDB 索引
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        12 MongoDB 索引
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#mongodb" class="md-nav__link">
+    MongoDB 索引机制
+  </a>
+  
+    <nav class="md-nav" aria-label="MongoDB 索引机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-index-key" class="md-nav__link">
+    1 术语 – Index / Key
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-covered-query" class="md-nav__link">
+    2 术语 – Covered Query
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ixscancollscan" class="md-nav__link">
+    术语 – IXSCAN/COLLSCAN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-shape" class="md-nav__link">
+    术语 – Query Shape
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#index-prefix" class="md-nav__link">
+    术语 – Index Prefix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-selectivity" class="md-nav__link">
+    术语 - Selectivity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b" class="md-nav__link">
+    B树结构
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    数据结构与算法复习
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-mongodb" class="md-nav__link">
+    2  MongoDB 索引机制
+  </a>
+  
+    <nav class="md-nav" aria-label="2  MongoDB 索引机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    索引执行计划
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explain" class="md-nav__link">
+    explain()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mongodb_1" class="md-nav__link">
+    MongoDB 索引类型
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compound-index" class="md-nav__link">
+    组合索引 – Compound Index
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    组合索引工作模式
+  </a>
+  
+    <nav class="md-nav" aria-label="组合索引工作模式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    范围组合查询: 索引字段顺序的影响
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    范围+排序组合查询: 索引字段顺序的影响
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    地理位置索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    全文索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    部分索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    其他索引技巧
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../13mon_perf/" class="md-nav__link">
+        13 MongoDB 性能
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../14mon_cluster/" class="md-nav__link">
+        14 高级集群设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../15mon_goonline/" class="md-nav__link">
+        15 MongoDB上线及升级
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../16mon_sample/" class="md-nav__link">
+        16 MongoDB 应用实例和场景
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../17mon_dms/" class="md-nav__link">
+        17 数据迁移
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../18mon_spark/" class="md-nav__link">
+        18 MongoDB + Spark实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../19mon_sql/" class="md-nav__link">
+        19 MongoDB SQL 套接件
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../20MongoDB_mico_middle_service/" class="md-nav__link">
+        20 MongoDB 与微服务 & 数据中台
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          PostgresSQL 12.6运维入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          PostgresSQL 12.6运维入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/2pg_intall/" class="md-nav__link">
+        1 PostgreSQL介绍&安装&链接管理&用户权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/3pg_cmd/" class="md-nav__link">
+        2 常用基础命令介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_logs/" class="md-nav__link">
+        3 Online WAL[Write Head Log]日志（redo)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_stru/" class="md-nav__link">
+        4 体系结构介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/5pg_bak/" class="md-nav__link">
+        5 备份恢复恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/6pg_repl/" class="md-nav__link">
+        6 Master-Slave流复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/7pg_ops/" class="md-nav__link">
+        7 有用的系统函数
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/1pg_int/" class="md-nav__link">
+        PostgreSQL Interview Questions 2022
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          AWS DB OTHERs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          AWS DB OTHERs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/1aws_neptune/" class="md-nav__link">
+        L1 深入了解 Amazon Neptune 图数据库技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/2dydb1/" class="md-nav__link">
+        L2 分布式键值存储 Dynamo 的实现原理
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          Extra 知识扩展
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#mongodb" class="md-nav__link">
+    MongoDB 索引机制
+  </a>
+  
+    <nav class="md-nav" aria-label="MongoDB 索引机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-index-key" class="md-nav__link">
+    1 术语 – Index / Key
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-covered-query" class="md-nav__link">
+    2 术语 – Covered Query
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ixscancollscan" class="md-nav__link">
+    术语 – IXSCAN/COLLSCAN
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#query-shape" class="md-nav__link">
+    术语 – Query Shape
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#index-prefix" class="md-nav__link">
+    术语 – Index Prefix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#-selectivity" class="md-nav__link">
+    术语 - Selectivity
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b" class="md-nav__link">
+    B树结构
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    数据结构与算法复习
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-mongodb" class="md-nav__link">
+    2  MongoDB 索引机制
+  </a>
+  
+    <nav class="md-nav" aria-label="2  MongoDB 索引机制">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    索引执行计划
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explain" class="md-nav__link">
+    explain()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mongodb_1" class="md-nav__link">
+    MongoDB 索引类型
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#compound-index" class="md-nav__link">
+    组合索引 – Compound Index
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    组合索引工作模式
+  </a>
+  
+    <nav class="md-nav" aria-label="组合索引工作模式">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    范围组合查询: 索引字段顺序的影响
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    范围+排序组合查询: 索引字段顺序的影响
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    地理位置索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    全文索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    部分索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    其他索引技巧
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="12-mongodb"><strong>12 MongoDB 索引</strong></h1>
+<h2 id="mongodb"><strong>MongoDB 索引机制</strong></h2>
+<h3 id="1-index-key"><strong>1 术语 – Index / Key</strong></h3>
+<p><strong>Index/Key/DataPage——索引/键/数据页?</strong></p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_1.png" title="Body image" /></p>
+<h3 id="2-covered-query"><strong>2 术语 – Covered Query</strong></h3>
+<p>Covered Query/FETCH——查询覆盖/抓取?</p>
+<p>如果所有需要的字段都在索引中，不需要额外的字段，就可 以不再需要从数据页加载数据，这就是查询覆盖。</p>
+<pre><code>db.human.createIndex({firstName: 1, lastName: 1, gender: 1, age: 1})
+</code></pre>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_2.png" title="Body image" /></p>
+<h3 id="ixscancollscan"><strong>术语 – IXSCAN/COLLSCAN</strong></h3>
+<p>IXSCAN/COLLSCAN——索引扫描/集合扫描</p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_3.png" title="Body image" /></p>
+<p>术语 – Big O Notation</p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_4.png" title="Body image" /></p>
+<h3 id="query-shape"><strong>术语 – Query Shape</strong></h3>
+<p><strong>Query Shape——查询的形状?</strong></p>
+<pre><code>query Shape = {
+    &quot;attribute.name&quot;: 1, 
+    &quot;attribute.value&quot;: 1
+}
+</code></pre>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_5.png" title="Body image" /></p>
+<h3 id="index-prefix"><strong>术语 – Index Prefix</strong></h3>
+<p><strong><code>Index Prefix——索引前缀</code></strong></p>
+<pre><code>db.human.createIndex({firstName: 1, lastName: 1, gender: 1, age: 1})
+</code></pre>
+<p>以上索引的全部前缀包括:</p>
+<ul>
+<li><code>{firstName: 1}</code></li>
+<li><code>{firstName: 1, lastName: 1}</code></li>
+<li><code>{firstName: 1, lastName: 1, gender: 1}</code></li>
+</ul>
+<p><strong>所有索引前缀都可以被该索引覆盖，没有必要针对这些查询建立额外的索引</strong></p>
+<h3 id="-selectivity"><strong>术语 - Selectivity</strong></h3>
+<blockquote>
+<p>Selectivity——过滤性</p>
+</blockquote>
+<p>在一个有10000条记录的集合中:</p>
+<ul>
+<li>满足 <code>gender= F</code> 的记录有4000 条</li>
+<li>满足 <code>city=LA</code> 的记录有 100 条</li>
+<li>满足 <code>ln='parker'</code> 的记录有 10 条</li>
+</ul>
+<p>条件 ln 能过滤掉最多的数据，city 其次，gender 最弱。所以 ln 的过 滤性(selectivity)大于 city 大于 gender。</p>
+<p>如果要查询同时满足:</p>
+<p><code>gender == F &amp;&amp; city == SZ &amp;&amp; ln == 'parker'</code></p>
+<p>的记录，但只允许为 <code>gender/city/ln</code> 中的一个建立索引，应该把索引放在哪里?</p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_6.png" title="Body image" /></p>
+<p><strong>ln 更高效</strong></p>
+<h3 id="b"><strong>B树结构</strong></h3>
+<p>索引背后是 B-树。要正确使用索引，必须先了解 B-树的工作原理。</p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_7.png" title="Body image" /></p>
+<p>B- 树: 基于B树，但是子节点数量可以超过2个</p>
+<h3 id="_1"><strong>数据结构与算法复习</strong></h3>
+<p>由于 B树/B-树的工作过程过于复杂，但本质上它是一个有序的数据结构。我们 用数组来理解它。假设索引为<code>{a: 1}(a 升序)</code>:</p>
+<pre><code>数据                               索引
+db.table.insert({a: 1})          [1]
+db.table.insert({a: 10})         [1, 10]
+db.table.insert({a: 5})          [1, 5, 10]
+db.table.insert({a: 7})          [1, 5, 7, 10]
+db.table.insert({a: 3})          [1, 3,5,7,10]
+</code></pre>
+<ul>
+<li>数据增加/删除时始终 保持被索引字段有序</li>
+<li>数组插入效率太低，但 B 树可以高效实现</li>
+<li>在有序结构上实施二分查找，可实现 O(log2(n)) 高效搜索</li>
+</ul>
+<h2 id="2-mongodb"><strong>2  MongoDB 索引机制</strong></h2>
+<h3 id="_2"><strong>索引执行计划</strong></h3>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_8.png" title="Body image" /></p>
+<p><strong>假设集合有两个索引</strong></p>
+<ol>
+<li><code>{city: 1}</code></li>
+<li><code>{last_name:1 }</code></li>
+</ol>
+<p>查询:</p>
+<p><code>db.members.find({ city: "LA", last_name: "parker"})</code> 问题:用哪个索引?</p>
+<h3 id="explain"><strong><code>explain()</code></strong></h3>
+<pre><code>-- 写入10000条文档
+
+for (var i=1;i&lt;100000; i++)
+    db.col.insert({name:i, age:i, date:new Date() 
+} )
+
+-- 查询
+db.col.find({name:1111}).explain(true)
+</code></pre>
+<pre><code>&gt;&gt;&quot;executionStats&quot; :
+{ 
+    &quot;executionSuccess&quot; : true,
+    &quot;nReturned&quot; : 1,
+    &quot;executionTimeMillis&quot; : 58,
+    &quot;totalKeysExamined&quot; : 0,
+    &quot;totalDocsExamined&quot; : 99999,
+        &quot;executionStages&quot; : {
+        &quot;stage&quot; : &quot;COLLSCAN&quot;,
+        &quot;filter&quot; : {&quot;name&quot; : {&quot;$eq&quot; : 1111}}, 
+        &quot;nReturned&quot; : 1,
+        &quot;executionTimeMillisEstimate&quot; : 53, 
+        &quot;works&quot; : 100001,
+        &quot;advanced&quot; : 1, 
+        &quot;needTime&quot; : 99999, 
+        &quot;needYield&quot; : 0, 
+        &quot;saveState&quot; : 783, 
+        &quot;restoreState&quot; : 783, 
+        &quot;isEOF&quot; : 1,
+        &quot;invalidates&quot; : 0, 
+        &quot;direction&quot; : &quot;forward&quot;, 
+        &quot;docsExamined&quot; : 99999
+</code></pre>
+<ul>
+<li><code>"executionTimeMillis" : 58</code></li>
+<li><code>"totalDocsExamined" : 99999</code></li>
+<li><code>"stage" : "COLLSCAN",</code></li>
+<li><code>"docsExamined" : 99999</code></li>
+</ul>
+<p><strong>插入索引</strong></p>
+<pre><code>-- 写入10000条文档
+for (var i=1;i&lt;100000; i++)
+    db.col.insert(
+        {name:i, age:i, date:new Date() } 
+)
+-- 创建name索引 
+db.col.createIndex({name:1})
+
+-- 查询 
+db.col.find({name:1111}).explain(true)
+</code></pre>
+<pre><code>&gt; &quot;executionStats&quot; : {
+    &quot;executionSuccess&quot; : true, 
+    &quot;nReturned&quot; : 1,
+    &quot;executionTimeMillis&quot; : 3, 
+    &quot;totalKeysExamined&quot; : 1, 
+    &quot;totalDocsExamined&quot; : 1, 
+    &quot;executionStages&quot; : {
+        &quot;stage&quot; : &quot;FETCH&quot;, 
+        &quot;nReturned&quot; : 1,
+    &quot;executionTimeMillisEstimate&quot; : 0,
+        &quot;docsExamined&quot; : 1, 
+        &quot;alreadyHasObj&quot; : 0, 
+        &quot;inputStage&quot; : {
+            &quot;stage&quot; : &quot;IXSCAN&quot;,
+            &quot;nReturned&quot; : 1,
+            &quot;executionTimeMillisEstimate&quot; : 0,
+            &quot;works&quot; : 2,
+            &quot;advanced&quot; : 1,
+         ...
+}
+</code></pre>
+<ul>
+<li><strong><code>"executionTimeMillis" : 3,</code></strong></li>
+<li><strong><code>"totalDocsExamined" : 1,</code></strong></li>
+<li><strong><code>"docsExamined" : 1</code></strong></li>
+<li><strong><code>"stage" : "IXSCAN",</code></strong></li>
+</ul>
+<h3 id="mongodb_1"><strong>MongoDB 索引类型</strong></h3>
+<ul>
+<li>单键索引</li>
+<li><strong>组合索引</strong></li>
+<li>多值索引</li>
+<li><strong>地理位置索引</strong></li>
+<li><strong>全文索引</strong></li>
+<li>TTL索引 </li>
+<li><strong>部分索引</strong> </li>
+<li>哈希索引</li>
+</ul>
+<h3 id="compound-index"><strong>组合索引 – Compound Index</strong></h3>
+<pre><code>db.members.find({ gender: &quot;F&quot;， age: {$gte: 18}}).sort(&quot;join_date:1&quot;)
+</code></pre>
+<pre><code>{ gender: 1, age: 1, join_date: 1 } 
+{ gender: 1, join_date:1, age: 1 } 
+{ join_date: 1, gender: 1, age: 1 } 
+{ join_date: 1, age: 1, gender: 1 } 
+{ age: 1, join_date: 1, gender: 1} 
+{ age: 1, gender: 1, join_date: 1}
+</code></pre>
+<p>这么多候选的，用哪一个?</p>
+<p><strong>组合索引的最佳方式:ESR原则</strong></p>
+<ul>
+<li>精确(<strong>E</strong>qual)匹配的字段放最前面</li>
+<li>排序(<strong>S</strong>ort)条件放中间</li>
+<li>范围(<strong>R</strong>ange)匹配的字段放最后面</li>
+</ul>
+<p>同样适用: ES, ER</p>
+<h3 id="_3"><strong>组合索引工作模式</strong></h3>
+<pre><code>{a: 1, b: 2, c: 1} 
+{a: 1, b: 2, c: 2} 
+{a: 2, b: 2, c: 1} 
+{a: 2, b: 2, c: 3} 
+{a: 2, b: 3, c: 1} 
+{a: 2, b: 3, c: 2} 
+{a: 2, b: 3, c: 4}
+
+db.test.createIndex({ 
+    a: 1,
+    b: 1,
+    c: 1 
+})
+</code></pre>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_9.png" title="Body image" /></p>
+<p><strong>组合索引工作模式: 精确匹配</strong></p>
+<p><code>db.test.createIndex({a: 1, b: 1, c: 1})</code></p>
+<pre><code>db.test.find({
+    a: 2,
+    b: 2,
+    c: 1 
+})
+</code></pre>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_10.png" title="Body image" /></p>
+<h4 id="_4"><strong>范围组合查询: 索引字段顺序的影响</strong></h4>
+<p><code>db.test.find({a: 2, b: {$gte: 2, $lte: 3}, c: 1})</code></p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_11.png" title="Body image" /></p>
+<p><strong>EER is much better</strong></p>
+<h3 id="_5"><strong>范围+排序组合查询: 索引字段顺序的影响</strong></h3>
+<p><strong><code>db.test.find({a: 2, b: {$gte: 2, $lte: 3}).sort({c: 1})</code></strong></p>
+<p><img alt="Alt Image Text" src="../../images/mon2_12_12.png" title="Body image" /></p>
+<p><strong>ESR is much better</strong></p>
+<p><strong><mark>ERS 里面内存排序将会耗费大量的内存</mark></strong></p>
+<h3 id="_6"><strong>地理位置索引</strong></h3>
+<pre><code>-- 创建索引
+db.geo_col.createIndex(
+        { location: &quot;2d&quot;} ,
+        { min:-20, max: 20 , bits: 10},
+        {collation:{locale: &quot;simple&quot;} }
+)
+
+db.geo_col.find(
+    { location :
+        { $geoWithin:  { $box : [ [ 1, 1 ] , [ 3, 3 ] ] } } }
+)
+</code></pre>
+<pre><code>-- 查询结果
+{ &quot;_id&quot; : ObjectId(&quot;5c7e7a6243513eb45bf06125&quot;), &quot;location&quot; : [ 1, 1 ] }
+ { &quot;_id&quot; : ObjectId(&quot;5c7e7a6643513eb45bf06126&quot;), &quot;location&quot; : [ 1, 2 ] } 
+ { &quot;_id&quot; : ObjectId(&quot;5c7e7a6943513eb45bf06127&quot;), &quot;location&quot; : [ 2, 2 ] } 
+ { &quot;_id&quot; : ObjectId(&quot;5c7e7a6d43513eb45bf06128&quot;), &quot;location&quot; : [ 2, 1 ] } 
+ { &quot;_id&quot; : ObjectId(&quot;5c7e7a7343513eb45bf06129&quot;), &quot;location&quot; : [ 3, 1 ] } 
+ { &quot;_id&quot; : ObjectId(&quot;5c7e7a7543513eb45bf0612a&quot;), &quot;location&quot; : [ 3, 2 ] } 
+ { &quot;_id&quot; : ObjectId(&quot;5c7e7a7743513eb45bf0612b&quot;), &quot;location&quot; : [ 3, 3 ] }
+</code></pre>
+<h3 id="_7"><strong>全文索引</strong></h3>
+<pre><code>-- 插入数据
+db.&lt;collection_name&gt;.insert(
+    { _id: 1, content: &quot;This morning I had a cup of coffee.&quot;, about: &quot;beverage&quot;, keywords: [ &quot;coffee&quot; ] } ,
+    { _id: 2, content: &quot;Who doesn't like cake?&quot;, about: &quot;food&quot;, keywords: [ &quot;cake&quot;, &quot;food&quot;, &quot;dessert&quot; ] },
+    { _id: 3, content: &quot;Why need coffee?&quot;, about: ”food&quot;, keywords: [ ”drink&quot;, &quot;food&quot; ] }
+)
+
+
+-- 创建索引
+&gt;&gt; db.&lt;collection_name&gt;.createIndex(
+    {'content': 'text' }
+)
+
+-- 查询
+db.&lt;collection_name&gt;.find( { 
+    $text :   { $search : &quot;cup coffee like&quot; }
+})
+
+db.&lt;collection_name&gt;.find( { 
+    $text:  {$search: &quot;a cup of coffee&quot; }
+})
+
+-- 查询排序
+db.&lt;collection_name&gt;.find(
+    { $text : { $search : &quot;coffee&quot;} },
+    { textScore: { $meta : &quot;textScore&quot; }} ).sort({ textScore: { $meta: &quot;textScore&quot; }} )
+</code></pre>
+<h3 id="_8"><strong>部分索引</strong></h3>
+<pre><code>-- 创建部分索引
+&gt;&gt; db.&lt;collection_name&gt;.createIndex( 
+    {'a': 1 },
+    { partialFilterExpression: 
+        {a:{
+            $gte:5
+        } 
+    }
+)
+
+-- 只对有wechat字段的建索引:
+db.&lt;collection_name&gt;.createIndex( 
+    {'wechat': 1 },
+    { partialFilterExpression: 
+        {wechat:
+            {$exists: true}
+        } 
+)
+
+-- 索引目标文档
+{ &quot;_id&quot; : ObjectId(&quot;5c7f4d8723a59b2f55f58ca9&quot;), &quot;a&quot; : 5 } 
+{ &quot;_id&quot; : ObjectId(&quot;5c7f4d8723a59b2f55f58caa&quot;), &quot;a&quot; : 6 } 
+{ &quot;_id&quot; : ObjectId(&quot;5c7f4d8723a59b2f55f58cab&quot;), &quot;a&quot; : 7 } 
+{ &quot;_id&quot; : ObjectId(&quot;5c7f4d8723a59b2f55f58cac&quot;), &quot;a&quot; : 8 }
+{ &quot;_id&quot; : ObjectId(&quot;5c7f4d8723a59b2f55f58cad&quot;), &quot;a&quot; : 9 } 
+{ &quot;_id&quot; : ObjectId(&quot;5c7f4d8723a59b2f55f58cae&quot;), &quot;a&quot; : 10} 
+</code></pre>
+<h3 id="_9"><strong>其他索引技巧</strong></h3>
+<p><strong>后台创建索引</strong></p>
+<pre><code>db.member.createIndex( { city: 1}, {background: true} )
+</code></pre>
+<p><strong>对BI / 报表专用节点单独创建索引</strong></p>
+<ul>
+<li>该从节点priority设为0</li>
+<li>关闭该从节点，</li>
+<li>以单机模式启动</li>
+<li>添加索引(分析用)</li>
+<li>关闭该从节点，以副本集模式启动</li>
+</ul>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021-9999 Jacob Xi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>

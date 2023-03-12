@@ -1,0 +1,2658 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      
+        <link rel="prev" href="../5mongodb_springbboot/">
+      
+      
+        <link rel="next" href="../7mongodb_pip2/">
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>6 MongoDB 聚合操作 - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#6-mongodb" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              6 MongoDB 聚合操作
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          MySQL 基础篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql1_innodb/" class="md-nav__link">
+        第七节 "Shallow Dive" MySQL 和 InnoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql3_transaction/" class="md-nav__link">
+        第八节 "Shallow Dive" MySQL 中事务的实现(`transaction`)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql2_index/" class="md-nav__link">
+        第九节 "Shallow Dive" MySQL 索引设计概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql5_btree/" class="md-nav__link">
+        第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql_bia_review/" class="md-nav__link">
+        MySQL 基础知识复习
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          MySQL 实战篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 实战篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/1table_design/" class="md-nav__link">
+        L1 表结构设计篇 - 数据类型
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/2table_design/" class="md-nav__link">
+        L2 表结构设计篇 - 表设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/3table_index/" class="md-nav__link">
+        L3 索引优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/4table_query/" class="md-nav__link">
+        L4 查询优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/5db_perf_replica/" class="md-nav__link">
+        L5 高可用架构 - MySQL 复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/6db_ha/" class="md-nav__link">
+        L6 MySQL高可用架构
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/7Dist_db/" class="md-nav__link">
+        L7 分布式架构篇
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/9Mysql_copy/" class="md-nav__link">
+        L8 MySQL的零拷贝技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/8opt_int/" class="md-nav__link">
+        L8 Operation Interview
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          AWS Aurora 技术与实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          MySQL on K8S
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/2mysql_Master_slave/" class="md-nav__link">
+        第二节 在K8s中部署主从结构的MySQL服务
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          MySQL 基础操作篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础操作篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/1db_intro/" class="md-nav__link">
+        第一节 数据库简介、及常用数据库介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/2db_install/" class="md-nav__link">
+        第二节 安装 MySQL Repository & Jam db install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/3db_sql/" class="md-nav__link">
+        第三节 结构化查询语言 SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/4db_sql_ops1/" class="md-nav__link">
+        第四节 MySQL 操作实例(上)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/5db_sql_ops2/" class="md-nav__link">
+        第五节 MySQL 操作实例(中)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/6db_sql_ops3/" class="md-nav__link">
+        第六节 Mysql操作实例(下)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/7db_type/" class="md-nav__link">
+        第七节 MySQL 数据类型约束
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/8db_index/" class="md-nav__link">
+        第八节 MySQL 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/9db_mgt/" class="md-nav__link">
+        第九节 MySQL 的用户管理和权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/10db_logs/" class="md-nav__link">
+        第十节 MySQL 日志管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/11db_backup/" class="md-nav__link">
+        第十一节 MySQL备份概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/13db_xtrabackup/" class="md-nav__link">
+        第十二节 MySQL逻辑备份mysqldump
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/14mysql_replicate/" class="md-nav__link">
+        第十四节 MySQL 主从复制原理介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/15mysql_master_slave/" class="md-nav__link">
+        第十五节 MySQL 传统主从同步配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/16mysq_gtid/" class="md-nav__link">
+        第十六节 MySQL 基于 GTID 的主从复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/17ops_review/" class="md-nav__link">
+        Mysql OPS Review
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/18review_short/" class="md-nav__link">
+        SQL操作精简版
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          MongoDB 操作实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 操作实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1mongodb_intro/" class="md-nav__link">
+        1 MongoDB介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2mongodb_install/" class="md-nav__link">
+        2 MongoDB 快速安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3mongodb_k8s_cluster/" class="md-nav__link">
+        3 在 Kubernetes 上编排 MongoDB 集群
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4mongodb_opt/" class="md-nav__link">
+        4 MongoDB文档操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5mongodb_springbboot/" class="md-nav__link">
+        5 MongoDB整合SpringBoot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          6 MongoDB 聚合操作
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        6 MongoDB 聚合操作
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    6.1 单一作用聚合
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    6.2 聚合管道
+  </a>
+  
+    <nav class="md-nav" aria-label="6.2 聚合管道">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mongodb" class="md-nav__link">
+    什么是MongoDB聚合框架
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinestage" class="md-nav__link">
+    管道（Pipeline）和阶段（Stage)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    常用的管道聚合阶段
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project" class="md-nav__link">
+    聚合管道之$project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project_1" class="md-nav__link">
+    $project 投影操作
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#match" class="md-nav__link">
+    $match
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count" class="md-nav__link">
+    $count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group" class="md-nav__link">
+    $group
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unwind" class="md-nav__link">
+    $unwind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limit" class="md-nav__link">
+    $limit
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip" class="md-nav__link">
+    $skip
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort" class="md-nav__link">
+    $sort
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lookup" class="md-nav__link">
+    $lookup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../7mongodb_pip2/" class="md-nav__link">
+        7 MongoDB聚合操作高级操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../8mongodb_view/" class="md-nav__link">
+        8 MongoDB视图
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../9mongodb_index/" class="md-nav__link">
+        9 MongoDB索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../10mongodb_index_adv/" class="md-nav__link">
+        10 索引属性
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../11mongodb_explain/" class="md-nav__link">
+        11 explain执行计划详解
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          MongoDB 高级实战教程(全)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 高级实战教程(全)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/1mon_intro_install/" class="md-nav__link">
+        1 认识文档数据库 MongoDB & 及数据安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/2mon_command/" class="md-nav__link">
+        2 MongoDB 基本操作及聚合操作实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/3mon_rep/" class="md-nav__link">
+        3 复制集机制及原理 & 实现
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/4mon_tools/" class="md-nav__link">
+        4 MongoDB 全家桶
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/5mon_design/" class="md-nav__link">
+        5 Mongo 模型设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/6mon_red_write/" class="md-nav__link">
+        6 MongoDB 事务开发
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/7mon_changestream_bestdesign/" class="md-nav__link">
+        7 MongoDB Change Stream & 开发最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/8mon_shard/" class="md-nav__link">
+        8 Mongo Shards分片技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/9mon_monitor/" class="md-nav__link">
+        9 MongoDB 监控最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/10mon_bakup_restore/" class="md-nav__link">
+        10 MongoDB 备份与恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/11mon_sec/" class="md-nav__link">
+        11 MongoDB 安全设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/12mon_index/" class="md-nav__link">
+        12 MongoDB 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/13mon_perf/" class="md-nav__link">
+        13 MongoDB 性能
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/14mon_cluster/" class="md-nav__link">
+        14 高级集群设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/15mon_goonline/" class="md-nav__link">
+        15 MongoDB上线及升级
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/16mon_sample/" class="md-nav__link">
+        16 MongoDB 应用实例和场景
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/17mon_dms/" class="md-nav__link">
+        17 数据迁移
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/18mon_spark/" class="md-nav__link">
+        18 MongoDB + Spark实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/19mon_sql/" class="md-nav__link">
+        19 MongoDB SQL 套接件
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/20MongoDB_mico_middle_service/" class="md-nav__link">
+        20 MongoDB 与微服务 & 数据中台
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          PostgresSQL 12.6运维入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          PostgresSQL 12.6运维入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/2pg_intall/" class="md-nav__link">
+        1 PostgreSQL介绍&安装&链接管理&用户权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/3pg_cmd/" class="md-nav__link">
+        2 常用基础命令介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_logs/" class="md-nav__link">
+        3 Online WAL[Write Head Log]日志（redo)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_stru/" class="md-nav__link">
+        4 体系结构介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/5pg_bak/" class="md-nav__link">
+        5 备份恢复恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/6pg_repl/" class="md-nav__link">
+        6 Master-Slave流复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/7pg_ops/" class="md-nav__link">
+        7 有用的系统函数
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/1pg_int/" class="md-nav__link">
+        PostgreSQL Interview Questions 2022
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          AWS DB OTHERs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          AWS DB OTHERs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/1aws_neptune/" class="md-nav__link">
+        L1 深入了解 Amazon Neptune 图数据库技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/2dydb1/" class="md-nav__link">
+        L2 分布式键值存储 Dynamo 的实现原理
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          Extra 知识扩展
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#61" class="md-nav__link">
+    6.1 单一作用聚合
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#62" class="md-nav__link">
+    6.2 聚合管道
+  </a>
+  
+    <nav class="md-nav" aria-label="6.2 聚合管道">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mongodb" class="md-nav__link">
+    什么是MongoDB聚合框架
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pipelinestage" class="md-nav__link">
+    管道（Pipeline）和阶段（Stage)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    常用的管道聚合阶段
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project" class="md-nav__link">
+    聚合管道之$project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#project_1" class="md-nav__link">
+    $project 投影操作
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#match" class="md-nav__link">
+    $match
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#count" class="md-nav__link">
+    $count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#group" class="md-nav__link">
+    $group
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#unwind" class="md-nav__link">
+    $unwind
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#limit" class="md-nav__link">
+    $limit
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#skip" class="md-nav__link">
+    $skip
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sort" class="md-nav__link">
+    $sort
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lookup" class="md-nav__link">
+    $lookup
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="6-mongodb"><strong>6 MongoDB 聚合操作</strong></h1>
+<p>聚合操作处理数据记录并返回计算结果（诸如统计平均值，求和等）。聚合操作组值来自多个文档，可以对分组数据执行各种操作以返回单个结果。聚合操作包含三类：<strong>单一作用聚合、聚合管道、Map Reduce</strong></p>
+<ul>
+<li><strong>单一作用聚合</strong>：<strong>提供了对常见聚合过程的简单访问，操作都从单个集合聚合文档</strong>。</li>
+<li><strong>聚合管道是一个数据聚合的框架，模型基于数据处理流水线的概念</strong>。文档进入多级管道，将文档转换为聚合结果。</li>
+<li><strong>MapReduce操作具有两个阶段:  处理每个文档并向每个输入文档发射一个或多个对象的map阶段，以及reduce组合map操作的输出阶段</strong></li>
+</ul>
+<h2 id="61"><strong>6.1 单一作用聚合</strong></h2>
+<p>MongoDB提供<code>db.collection.estimatedDocumentCount()</code>, <code>db.collection.count()</code>, <code>db.collection.distinct()</code> 这类单一作用的聚合函数。</p>
+<p>所有这些操作都聚合来自单个集合的文档。虽然这些操作提供了对公共聚合过程的简单访问，但它们缺乏聚合管道和<code>map-Reduce</code>的灵活性和功能。 </p>
+<pre><code># ./mongod -f /mongodb/conf/mongo.conf
+
+[root@jabox bin]# ./mongo localhost:27017 -u appdb -p jack --authenticationDatabase=appdb
+MongoDB shell version v4.4.13
+connecting to: mongodb://localhost:27017/test?authSource=appdb&amp;compressors=disabled&amp;gssapiServiceName=mongodb
+Implicit session: session { &quot;id&quot; : UUID(&quot;83295a08-879f-46bf-92a0-a36769fdded9&quot;) }
+MongoDB server version: 4.4.13
+&gt; use appdb
+switched to db appdb
+
+&gt;  db.books.find().count()
+48
+
+&gt; db.books.count()
+48
+
+&gt; db.books.count({type:&quot;travel&quot;})
+11
+
+&gt; db.books.estimatedDocumentCount({type:&quot;travel&quot;})
+48
+
+&gt; db.books.distinct(&quot;type&quot;)
+
+
+&gt; db.books.distinct(&quot;type&quot;)
+[ &quot;literature&quot;, &quot;novel&quot;, &quot;sociality&quot;, &quot;technology&quot;, &quot;travel&quot; ]
+</code></pre>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_1.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_2.png" title="Body image" /></p>
+<pre><code># 检索books集合中所有文档的计数
+db.books.estimatedDocumentCount()
+
+
+# 计算与查询匹配的所有文档
+db.books.count({favCount:{$gt:50}})
+
+&gt; db.books.count({favCount:{$gt:50}})
+1
+
+# 返回不同type的数组
+&gt; db.books.distinct(&quot;type&quot;)
+
+# 返回收藏数大于20的文档不同type的数组
+&gt; db.books.distinct(&quot;type&quot;,{favCount:{$gt:20}})
+[ &quot;sociality&quot; ]
+</code></pre>
+<h2 id="62"><strong>6.2 聚合管道</strong></h2>
+<h3 id="mongodb"><strong>什么是MongoDB聚合框架</strong></h3>
+<p>MongoDB聚合框架（Aggregation Framework）是一个计算框架，它可以：</p>
+<ul>
+<li>作用在一个或几个集合上： </li>
+<li>对集合中的数据进行的一系列运算； </li>
+<li>将这些数据转化为期望的形式； </li>
+</ul>
+<p>从效果而言，聚合框架相当于SQL查询中的<code>GROUP BY</code>、<code>LEFT OUTER JOIN</code>、<code>AS</code>等</p>
+<h3 id="pipelinestage"><strong>管道（Pipeline）和阶段（Stage)</strong></h3>
+<p><strong>整个聚合运算过程称为管道（Pipeline)，它是由多个阶段（Stage)组成的，每个管道</strong></p>
+<ul>
+<li>接受一系列文档（原始数据）; </li>
+<li>每个阶段对这些文档进行一系列运算； </li>
+<li>结果文档输出给下一个阶段； </li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_3.png" title="Body image" /></p>
+<p>聚合管道操作语法 </p>
+<pre><code>pipeline ＝[$stage1, $stage2，… $stageN]; 
+db.collection.aggregate(pipeline,{options}) 
+</code></pre>
+<ul>
+<li><strong>pipelines一组数据聚合阶段</strong>。除<code>$out</code>、 <code>$Merge</code>和<code>＄geonear</code>阶段之外、每个阶段都可以在管道中出现多次。 </li>
+<li><strong>options可选，聚合操作的其他参数。包含：查询计划、是否使用临时文件、游标、最大操作时间、读写策略、强制索引等等</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_4.png" title="Body image" /></p>
+<h3 id="_1"><strong>常用的管道聚合阶段</strong></h3>
+<p>聚台管道包含非常丰富的聚合阶段，下面是最常用的聚合阶段 </p>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_5.png" title="Body image" /></p>
+<p>https://www.mongodb.com/docs/manual/core/aggregation-pipeline/</p>
+<h3 id="project"><strong>聚合管道之<code>$project</code></strong></h3>
+<p><strong>数据准备</strong></p>
+<p>准备数据集，执行脚本 </p>
+<p><strong>booksnew.js</strong></p>
+<pre><code>var tags = [&quot;nosql&quot;,&quot;mongodb&quot;,&quot;document&quot;,&quot;developer&quot;,&quot;popular&quot;]; 
+var types = [&quot;technology&quot;,&quot;sociality&quot;,&quot;travel&quot;,&quot;novel&quot;,&quot;literature&quot;]; 
+var books=[];
+for(var i=0;i&lt;50;i++){
+    var typeIdx = Math.floor(Math.random()*types.length);
+    var tagIdx = Math.floor(Math.random()*tags.length);
+    var tagIdx2 = Math.floor(Math.random()*tags.length);
+    var favCount = Math.floor(Math.random()*100);
+    var username = &quot;xx00&quot; + Math.floor(Math.random()*100);
+    var age = 20 + Math.floor(Math.random()*15);
+    var book = { 
+        title: &quot;book-&quot; +i, 
+        type: types[typeIdx], 
+        tag: tags[tagIdx], 
+        favCount: favCount, 
+        author: &quot;xxx&quot;+i 
+    };
+    books.push(book)
+}
+db.books.insertMany(books);
+</code></pre>
+<pre><code>./mongo localhost:27017 -u fox -p fox --authenticationDatabase=admin
+&gt; show dbs
+admin   0.000GB
+appdb   0.000GB
+config  0.000GB
+local   0.000GB
+</code></pre>
+<pre><code>
+&gt; use aggdemo
+switched to db aggdemo
+
+&gt; load(&quot;booksnew.js&quot;)
+true
+</code></pre>
+<h3 id="project_1"><strong><code>$project</code> 投影操作</strong></h3>
+<p><strong>将原始字段投影成指定名称</strong>，如将集合中的：<strong>title投影成name</strong></p>
+<pre><code>db.books.aggregate([{$project:{name:&quot;$title&quot;}}]) 
+</code></pre>
+<pre><code>db.books.aggregate([{$project:{name:&quot;$title&quot;}}])
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d2&quot;), &quot;name&quot; : &quot;book-0&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d3&quot;), &quot;name&quot; : &quot;book-1&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d4&quot;), &quot;name&quot; : &quot;book-2&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d5&quot;), &quot;name&quot; : &quot;book-3&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d6&quot;), &quot;name&quot; : &quot;book-4&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d7&quot;), &quot;name&quot; : &quot;book-5&quot; }
+</code></pre>
+<p><code>$project</code><strong>可以灵活控制输出文档的格式，也可以剔除不需要的字段</strong> </p>
+<ul>
+<li><strong>1 show the cols</strong></li>
+<li><strong>0 hide the cols</strong></li>
+</ul>
+<pre><code>db.books.aggregate([{$project:{name:&quot;$title&quot;,_id:0,type:1,author:1}}])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([{$project:{name:&quot;$title&quot;,_id:0,type:1,author:1}}])
+{ &quot;type&quot; : &quot;novel&quot;, &quot;author&quot; : &quot;xxx0&quot;, &quot;name&quot; : &quot;book-0&quot; }
+{ &quot;type&quot; : &quot;literature&quot;, &quot;author&quot; : &quot;xxx1&quot;, &quot;name&quot; : &quot;book-1&quot; }
+{ &quot;type&quot; : &quot;technology&quot;, &quot;author&quot; : &quot;xxx2&quot;, &quot;name&quot; : &quot;book-2&quot; }
+{ &quot;type&quot; : &quot;novel&quot;, &quot;author&quot; : &quot;xxx3&quot;, &quot;name&quot; : &quot;book-3&quot; }
+{ &quot;type&quot; : &quot;technology&quot;, &quot;author&quot; : &quot;xxx4&quot;, &quot;name&quot; : &quot;book-4&quot; }
+</code></pre>
+<p>从嵌套文档中排除字段 </p>
+<pre><code>db.books.aggregate([
+    {$project:{name:&quot;$title&quot;,_id:0,type:1,&quot;author.name&quot;:1}}
+])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$project:{name:&quot;$title&quot;,_id:0,type:1,&quot;author.name&quot;:1}}
+... ])
+{ &quot;type&quot; : &quot;novel&quot;, &quot;name&quot; : &quot;book-0&quot; }
+{ &quot;type&quot; : &quot;literature&quot;, &quot;name&quot; : &quot;book-1&quot; }
+{ &quot;type&quot; : &quot;technology&quot;, &quot;name&quot; : &quot;book-2&quot; }
+{ &quot;type&quot; : &quot;novel&quot;, &quot;name&quot; : &quot;book-3&quot; }
+{ &quot;type&quot; : &quot;technology&quot;, &quot;name&quot; : &quot;book-4&quot; }
+</code></pre>
+<p>或者</p>
+<pre><code>db.books.aggregate([
+    {$project:{name:&quot;$title&quot;,_id:1,type:1, author:{name:1}}}
+])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$project:{name:&quot;$title&quot;,_id:1,type:1, author:{name:1}}}
+... ])
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d2&quot;), &quot;type&quot; : &quot;novel&quot;, &quot;name&quot; : &quot;book-0&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d3&quot;), &quot;type&quot; : &quot;literature&quot;, &quot;name&quot; : &quot;book-1&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d4&quot;), &quot;type&quot; : &quot;technology&quot;, &quot;name&quot; : &quot;book-2&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d5&quot;), &quot;type&quot; : &quot;novel&quot;, &quot;name&quot; : &quot;book-3&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d6&quot;), &quot;type&quot; : &quot;technology&quot;, &quot;name&quot; : &quot;book-4&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d7&quot;), &quot;type&quot; : &quot;technology&quot;, &quot;name&quot; : &quot;book-5&quot; }
+</code></pre>
+<h3 id="match"><strong><code>$match</code></strong></h3>
+<p><strong><code>$match</code>用于对文档进行筛选，之后可以在得到的文档子集上做聚合，<code>$match</code>可以使用除了地理空间之外的所有常规查询操作符，在实际应用中尽可能将<code>$match</code>放在管道的前面位置。</strong></p>
+<p><strong>类似于where</strong></p>
+<p>这样有两个好处：一是可以快速将不需要的文档过滤掉，以减少管道的工作量；二是如果再投射和分组之前执行<code>＄match</code>，查询可以使用索引。 </p>
+<pre><code>db.books.aggregate([{$match:{type:&quot;technology&quot;}}])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([{$match:{type:&quot;technology&quot;}}])
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d4&quot;), &quot;title&quot; : &quot;book-2&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 4, &quot;author&quot; : &quot;xxx2&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d6&quot;), &quot;title&quot; : &quot;book-4&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : 37, &quot;author&quot; : &quot;xxx4&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d7&quot;), &quot;title&quot; : &quot;book-5&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 34, &quot;author&quot; : &quot;xxx5&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d8&quot;), &quot;title&quot; : &quot;book-6&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : 61, &quot;author&quot; : &quot;xxx6&quot; }
+...
+</code></pre>
+<p>筛选管道操作和其他管道操作配合时候时，尽<strong>量放到开始阶段，这样可以减少后续管道操作符要操作的文档数，提升效率</strong> </p>
+<pre><code>db.books.aggregate([{$match:{type:&quot;technology&quot;,title:/book-2/}}])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([{$match:{type:&quot;technology&quot;,title:/book-2/}}])
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d4&quot;), &quot;title&quot; : &quot;book-2&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 4, &quot;author&quot; : &quot;xxx2&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55ea&quot;), &quot;title&quot; : &quot;book-24&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 77, &quot;author&quot; : &quot;xxx24&quot; }
+</code></pre>
+<h3 id="count"><strong><code>$count</code></strong></h3>
+<p>计数并返回与查询匹配的结果数 </p>
+<pre><code>db.books.aggregate([ {$match:{type:&quot;technology&quot;}}, {$count:&quot;type_count&quot;} ])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([ {$match:{type:&quot;technology&quot;}}, {$count:&quot;type_count&quot;} ])
+{ &quot;type_count&quot; : 13 }
+</code></pre>
+<ul>
+<li><code>$match</code>阶段筛选出type匹配technology的文档，并传到下一阶段； </li>
+<li><code>$count</code>阶段返回聚合管道中剩余文档的计数，并将该值分配给<code>type_count</code></li>
+</ul>
+<h3 id="group"><strong><code>$group</code></strong></h3>
+<p>按指定的表达式对文档进行分组，并将每个不同分组的文档输出到下一个阶段。输出文档包含一个<code>_id</code>字段，该字段按键包含不同的组。 </p>
+<p>输出文档还可以包含计算字段，该字段保存由<code>$group</code>的<code>_Id</code>字段分组的一些<code>accumulator</code>表达式的值。<code>$group</code>不会输出具体的文档而只是统计信息。 </p>
+<pre><code>{$group:{_id:&lt;expression&gt;, &lt;field1&gt;: {&lt;accumlator1&gt; : &lt;expression1&gt;},...}}
+</code></pre>
+<ul>
+<li>id字段是必填的，但是，可以指定id为null来为整个输入文档计算累计值</li>
+<li>剩余的计算字段是可选的，并使用<code>＜accumulator＞</code>运算符进行计算。 </li>
+<li><code>_id</code>和<code>&lt;accumulator＞</code>表达式可以接受任何有效的表达式。 </li>
+</ul>
+<p><strong>accumulator 操作符</strong></p>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_6.png" title="Body image" /></p>
+<p><code>$group</code>阶段的内存限制为<code>1OOM</code>默认情况下，如果<code>stage</code>超过此限制，<code>$group</code>将产生错误。但是，要允许处理大型数据集，请将<code>allowDiskUse</code>选项设置为<code>true</code>以启用<code>＄group</code>操作以写入临时文件。 </p>
+<p>book的数量，收藏总数和平均值 </p>
+<pre><code>db.books.aggregate([
+    {$group: {_id: null, count:{$sum:1}, pop:{$sum: &quot;$favCount&quot;}, avg:{$avg:&quot;$favCount&quot;}}} 
+]) 
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$group: {_id: null, count:{$sum:1}, pop:{$sum: &quot;$favCount&quot;}, avg:{$avg:&quot;$favCount&quot;}}}
+... ])
+{ &quot;_id&quot; : null, &quot;count&quot; : 50, &quot;pop&quot; : 2415, &quot;avg&quot; : 48.3 }
+</code></pre>
+<p><strong>统计每个作者的book收藏总数</strong></p>
+<pre><code>db.books.aggregate([ 
+    {$group:{_id:&quot;$author.name&quot;, pop:{$sum:&quot;$favCount&quot;}}} 
+]) 
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$group:{_id:&quot;$author.name&quot;, pop:{$sum:&quot;$favCount&quot;}}}
+... ])
+{ &quot;_id&quot; : null, &quot;pop&quot; : 2415 }
+</code></pre>
+<pre><code>db.books.aggregate([ 
+    {$group:{_id:&quot;$author.name&quot;, types:{$addToSet:&quot;$type&quot;}}} 
+]) 
+</code></pre>
+<h3 id="unwind"><strong><code>$unwind</code></strong></h3>
+<p><strong>可以将数组拆分为单独的文档</strong></p>
+<p><code>v3.2+</code> 支持如下语法： </p>
+<pre><code>{ 
+    $unwind: 
+    { 
+    # 要指定宇段路径，在字段名称前加上$符并用引号括起来。 
+    path: &lt;field path&gt;, 
+    # 可选，一个新字段的名称用于存放元素的数组索引。该名称不能以$开头。 
+    includeArraylndex: &lt;string&gt;, 
+    # 可选，default :false，若为true，如果路径为空，缺少或为空数组，则`$unwind`输出文档 
+    preserveNullAndEmptyArrays: &lt;boolean&gt; 
+}} 
+</code></pre>
+<ul>
+<li><code>$unwind</code>: 要指定宇段路径，在字段名称前加上$符并用引号括起来</li>
+<li>path: 可选，一个新字段的名称用于存放元素的数组索引。该名称不能以<code>$</code>开头。</li>
+<li>includeArraylndex: 可选，default :false，若为true，如果路径为空，缺少或为空数组，则<code>$unwind</code>输出文档 </li>
+</ul>
+<p><strong>姓名为xx0006的作者的book的tag数组拆分为多个文档</strong></p>
+<pre><code>db.books.aggregate([
+    {$match:{&quot;author&quot;: &quot;name&quot;:&quot;xxOO6&quot;}}, 
+    {{$unwind:&quot;$tag&quot;}
+]) 
+</code></pre>
+<pre><code>db.books.aggregate([{$unwind:&quot;$tag&quot;}])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([{$unwind:&quot;$tag&quot;}])
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d2&quot;), &quot;title&quot; : &quot;book-0&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : 99, &quot;author&quot; : &quot;xxx0&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d3&quot;), &quot;title&quot; : &quot;book-1&quot;, &quot;type&quot; : &quot;literature&quot;, &quot;tag&quot; : &quot;mongodb&quot;, &quot;favCount&quot; : 22, &quot;author&quot; : &quot;xxx1&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d4&quot;), &quot;title&quot; : &quot;book-2&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 4, &quot;author&quot; : &quot;xxx2&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d5&quot;), &quot;title&quot; : &quot;book-3&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 93, &quot;author&quot; : &quot;xxx3&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d6&quot;), &quot;title&quot; : &quot;book-4&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : 37, &quot;author&quot; : &quot;xxx4&quot; }
+</code></pre>
+<pre><code>db.books.aggregate([{$match:{type:&quot;travel&quot;}},{$unwind:&quot;$tag&quot;}])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([{$match:{type:&quot;travel&quot;}},{$unwind:&quot;$tag&quot;}])
+{ &quot;_id&quot; : ObjectId(&quot;623b0766b815b989a2335e7c&quot;), &quot;title&quot; : &quot;book-7&quot;, &quot;type&quot; : &quot;travel&quot;, &quot;tag&quot; : &quot;mongodb&quot;, &quot;favCount&quot; : -100, &quot;author&quot; : &quot;xxx7&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;623b0766b815b989a2335e7f&quot;), &quot;title&quot; : &quot;book-10&quot;, &quot;type&quot; : &quot;travel&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : -100, &quot;author&quot; : &quot;xxx10&quot;, &quot;publishDate&quot; : ISODate(&quot;2022-03-26T09:09:54.851Z&quot;) }
+{ &quot;_id&quot; : ObjectId(&quot;623b0766b815b989a2335e85&quot;), &quot;title&quot; : &quot;book-16&quot;, &quot;type&quot; : &quot;travel&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : -100, &quot;author&quot; : &quot;xxx16&quot; }
+</code></pre>
+<p>姓名为<code>xx006</code>的作者的book的tag数组拆分为多个文档 </p>
+<pre><code>db.books.aggregate([
+    {$match:{&quot;author.name&quot;:&quot;xxx006&quot;}}, 
+    {$unwind:&quot;$tag&quot;}
+])
+</code></pre>
+<p>每个作者的book的tag合集</p>
+<pre><code>db.books.aggregate([ 
+    {$unwind: &quot;$tag&quot;},
+    {$group:{_id:&quot;$author.name&quot;, types:{$addToSet:&quot;$tag&quot;}}} 
+]) 
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$unwind: &quot;$tag&quot;},
+... {$group:{_id:&quot;$author.name&quot;, types:{$addToSet:&quot;$tag&quot;}}}
+... ])
+{ &quot;_id&quot; : null, &quot;types&quot; : [ &quot;developer&quot;, &quot;mongodb&quot;, &quot;document&quot;, &quot;popular&quot;, &quot;nosql&quot; ] }
+</code></pre>
+<p><strong>案例</strong></p>
+<pre><code>db.books.insert([
+{   &quot;title&quot; : &quot;book-51&quot;,
+    &quot;type&quot; : &quot;technology&quot;,
+    &quot;favCount&quot;: 11,
+    &quot;tag&quot;: [], 
+    &quot;author&quot; : { 
+        &quot;name&quot; : &quot;fox&quot;, 
+        &quot;age&quot; : 28 
+    } 
+},{
+    &quot;title&quot; : &quot;book-52&quot;, 
+    &quot;type&quot; : &quot;technology&quot;, 
+    &quot;favCount&quot; : 15, 
+    &quot;author&quot; : { 
+        &quot;name&quot; : &quot;fox&quot;, 
+        &quot;age&quot; : 28 
+    } 
+},{ 
+  &quot;title&quot; : &quot;book-53&quot;, 
+  &quot;type&quot; : &quot;technology&quot;, 
+  &quot;tag&quot; : [ 
+    &quot;nosql&quot;, 
+    &quot;document&quot; 
+   ], 
+  &quot;favCount&quot; : 20, 
+  &quot;author&quot; : { 
+    &quot;name&quot; : &quot;fox&quot;, 
+    &quot;age&quot; : 28 
+    }
+}])
+</code></pre>
+<pre><code>BulkWriteResult({
+    &quot;writeErrors&quot; : [ ],
+    &quot;writeConcernErrors&quot; : [ ],
+    &quot;nInserted&quot; : 3,
+    &quot;nUpserted&quot; : 0,
+    &quot;nMatched&quot; : 0,
+    &quot;nModified&quot; : 0,
+    &quot;nRemoved&quot; : 0,
+    &quot;upserted&quot; : [ ]
+})
+</code></pre>
+<p><strong>测试</strong></p>
+<pre><code># 使用includeArrayIndex选项来输出数组元素的数组索引
+db.books.aggregate([ 
+    {$match:{&quot;author.name&quot;:&quot;fox&quot;}}, 
+    {$unwind: {path: &quot;$tag&quot;, includeArrayIndex: &quot;arraylndex&quot;}} 
+]) 
+# 使用 preserveNullAndEmptyArrays选项在输出中缺少size, null或者空数组文档
+db.books.aggregate([ 
+    {$match: {&quot;author.name&quot;:&quot;fox&quot;}}, 
+    {$unwind: {path:&quot;$tag&quot;, preserveNullAndEmptyArrays: true}} 
+])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$match:{&quot;author.name&quot;:&quot;fox&quot;}},
+... {$unwind: {path: &quot;$tag&quot;, includeArrayIndex: &quot;arraylndex&quot;}}
+... ])
+{ &quot;_id&quot; : ObjectId(&quot;624d6de764f997879be8a9ee&quot;), &quot;title&quot; : &quot;book-53&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : 20, &quot;author&quot; : { &quot;name&quot; : &quot;fox&quot;, &quot;age&quot; : 28 }, &quot;arraylndex&quot; : NumberLong(0) }
+{ &quot;_id&quot; : ObjectId(&quot;624d6de764f997879be8a9ee&quot;), &quot;title&quot; : &quot;book-53&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 20, &quot;author&quot; : { &quot;name&quot; : &quot;fox&quot;, &quot;age&quot; : 28 }, &quot;arraylndex&quot; : NumberLong(1) }
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$match: {&quot;author.name&quot;:&quot;fox&quot;}},
+... {$unwind: {path:&quot;$tag&quot;, preserveNullAndEmptyArrays: true}}
+... ])
+{ &quot;_id&quot; : ObjectId(&quot;624d6de764f997879be8a9ec&quot;), &quot;title&quot; : &quot;book-51&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;favCount&quot; : 11, &quot;author&quot; : { &quot;name&quot; : &quot;fox&quot;, &quot;age&quot; : 28 } }
+{ &quot;_id&quot; : ObjectId(&quot;624d6de764f997879be8a9ed&quot;), &quot;title&quot; : &quot;book-52&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;favCount&quot; : 15, &quot;author&quot; : { &quot;name&quot; : &quot;fox&quot;, &quot;age&quot; : 28 } }
+{ &quot;_id&quot; : ObjectId(&quot;624d6de764f997879be8a9ee&quot;), &quot;title&quot; : &quot;book-53&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : 20, &quot;author&quot; : { &quot;name&quot; : &quot;fox&quot;, &quot;age&quot; : 28 } }
+{ &quot;_id&quot; : ObjectId(&quot;624d6de764f997879be8a9ee&quot;), &quot;title&quot; : &quot;book-53&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 20, &quot;author&quot; : { &quot;name&quot; : &quot;fox&quot;, &quot;age&quot; : 28 } }
+</code></pre>
+<h3 id="limit"><strong><code>$limit</code></strong></h3>
+<p>限制传递到管道中下一阶段的文档数 </p>
+<pre><code>db.books.aggregate([
+    {$limit : 5}
+])
+</code></pre>
+<p><strong>此操作仅返回管道传递给它的前5个文档。<code>$limt</code>对其传递的文档内容没有影响。</strong></p>
+<p><strong>注意：当<code>＄sort</code>在管道中的<code>$Iimit</code>之前立即出现时，<code>$sort</code>操作只会在过程中维持前n个结果，其中n是指定的限制，而<code>MongoDB</code>只需要将n个项存储在内存中。</strong></p>
+<h3 id="skip"><strong><code>$skip</code></strong></h3>
+<p>跳过进入stage的指定数量的文档，并将其余文档传递到管道中的下一个阶段 </p>
+<pre><code>db.books.aggregate([
+    {$skip : 5}
+])
+</code></pre>
+<p>此操作将跳过管道传递给它的前5个文档。<code>$skip</code>对沿着管道传递的文档的内容没有影响。 </p>
+<h3 id="sort"><strong><code>$sort</code></strong></h3>
+<p>对所有输入文档进行排序，并按排序顺序将他们返回到管道。 语法： </p>
+<pre><code>{$sort: { &lt;field1&gt;: &lt;sort order&gt;,&lt;field 2&gt;: &lt;sort order＞… }} 
+</code></pre>
+<p><strong>要对字段进行排序，请将排序顺序设置为<code>1</code>或<code>-1</code>，以分别指定升序或降序排序</strong>，如下例所示 </p>
+<pre><code>db.books.aggregate([ 
+    {$sort: {favCount:-1, title: 1}} 
+])
+</code></pre>
+<pre><code>&gt; db.books.aggregate([
+... {$sort: {favCount:-1, title: 1}}
+... ])
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d2&quot;), &quot;title&quot; : &quot;book-0&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : 99, &quot;author&quot; : &quot;xxx0&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e5601&quot;), &quot;title&quot; : &quot;book-47&quot;, &quot;type&quot; : &quot;sociality&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 97, &quot;author&quot; : &quot;xxx47&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d5&quot;), &quot;title&quot; : &quot;book-3&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 93, &quot;author&quot; : &quot;xxx3&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55ef&quot;), &quot;title&quot; : &quot;book-29&quot;, &quot;type&quot; : &quot;sociality&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 91, &quot;author&quot; : &quot;xxx29&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55fd&quot;), &quot;title&quot; : &quot;book-43&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : 90, &quot;author&quot; : &quot;xxx43&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55fb&quot;), &quot;title&quot; : &quot;book-41&quot;, &quot;type&quot; : &quot;literature&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : 87, &quot;author&quot; : &quot;xxx41&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55e5&quot;), &quot;title&quot; : &quot;book-19&quot;, &quot;type&quot; : &quot;travel&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 86, &quot;author&quot; : &quot;xxx19&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55dc&quot;), &quot;title&quot; : &quot;book-10&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : 84, &quot;author&quot; : &quot;xxx10&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55fe&quot;), &quot;title&quot; : &quot;book-44&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 80, &quot;author&quot; : &quot;xxx44&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55ea&quot;), &quot;title&quot; : &quot;book-24&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 77, &quot;author&quot; : &quot;xxx24&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55f5&quot;), &quot;title&quot; : &quot;book-35&quot;, &quot;type&quot; : &quot;sociality&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 77, &quot;author&quot; : &quot;xxx35&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55df&quot;), &quot;title&quot; : &quot;book-13&quot;, &quot;type&quot; : &quot;literature&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 74, &quot;author&quot; : &quot;xxx13&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55f0&quot;), &quot;title&quot; : &quot;book-30&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;developer&quot;, &quot;favCount&quot; : 72, &quot;author&quot; : &quot;xxx30&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55fc&quot;), &quot;title&quot; : &quot;book-42&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 71, &quot;author&quot; : &quot;xxx42&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55e7&quot;), &quot;title&quot; : &quot;book-21&quot;, &quot;type&quot; : &quot;sociality&quot;, &quot;tag&quot; : &quot;popular&quot;, &quot;favCount&quot; : 65, &quot;author&quot; : &quot;xxx21&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55f3&quot;), &quot;title&quot; : &quot;book-33&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 65, &quot;author&quot; : &quot;xxx33&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55e1&quot;), &quot;title&quot; : &quot;book-15&quot;, &quot;type&quot; : &quot;novel&quot;, &quot;tag&quot; : &quot;mongodb&quot;, &quot;favCount&quot; : 64, &quot;author&quot; : &quot;xxx15&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d9&quot;), &quot;title&quot; : &quot;book-7&quot;, &quot;type&quot; : &quot;literature&quot;, &quot;tag&quot; : &quot;document&quot;, &quot;favCount&quot; : 63, &quot;author&quot; : &quot;xxx7&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55ee&quot;), &quot;title&quot; : &quot;book-28&quot;, &quot;type&quot; : &quot;travel&quot;, &quot;tag&quot; : &quot;mongodb&quot;, &quot;favCount&quot; : 62, &quot;author&quot; : &quot;xxx28&quot; }
+{ &quot;_id&quot; : ObjectId(&quot;624a4d590617ff50cb3e55d8&quot;), &quot;title&quot; : &quot;book-6&quot;, &quot;type&quot; : &quot;technology&quot;, &quot;tag&quot; : &quot;nosql&quot;, &quot;favCount&quot; : 61, &quot;author&quot; : &quot;xxx6&quot; }
+</code></pre>
+<h3 id="lookup"><strong><code>$lookup</code></strong></h3>
+<p><strong>Mongodb 3.2版本新增，主要用来实现多表关联查询，相当关系型数据库中多表关联查询。每个输入待处理的文档的处理，经过＄lookup阶段 的适配文档，输出的新文档中会包含一个新生成的数组(可根据需要命名新key)。数组列存放的数据是来自被<code>Join</code>集合，如果没 有，集合为空（即为<code>[]</code>)</strong></p>
+<p>语法 </p>
+<pre><code>db.collection.aggregate([{
+    $lookup:{ 
+        from: &quot;&lt;collection to join&gt;&quot; 
+        localField: &quot;&lt;field from the input documents&gt;&quot;
+         foreignField: &quot;&lt;field from the documents of the from collection&gt;&quot; 
+         as: &quot;&lt;output array field&gt;&quot; 
+    } 
+}) 
+</code></pre>
+<p><img alt="Alt Image Text" src="../../images/mon1_6_7.png" title="Body image" /></p>
+<p>注意：null = null 此为真</p>
+<p>其语法功能类似于下面的伪SQL语句</p>
+<pre><code>SELECT * ＜output array field&gt; 
+FROM collection
+WHERE ＜output array field＞ IN (SELECT * 
+                                FROM &lt;collection to join&gt; 
+                                WHERE &lt;foreignField＞=＜collection.local.Field&gt;);
+</code></pre>
+<p><strong>准备数据</strong></p>
+<pre><code>db.customer.insert({customerCode:1, name:&quot;customer1&quot;, phone:&quot;13112345678&quot;,address:&quot;test1&quot;}) db.customer.insert({customerCode:2,name:&quot;customer2&quot;,phone:&quot;13112345679&quot;,address:&quot;test2&quot;}) 
+
+db.order.insert({orderId:1, orderCode:&quot;order001&quot;,customerCode:1, price:200})
+db.order.insert({orderId1:2,orderCode:&quot;order002&quot;,customerCode:2,price:400}) 
+
+
+db.orderitem.insert({itemId:1,productName:&quot;apples&quot;,qutity:2,orderId:1}) 
+db.orderItem.insert({itemId:2, productName:&quot;oranges&quot;, qutity:2, orderId:1}) 
+</code></pre>
+<p><strong>关联查询</strong></p>
+<pre><code>db.customer.aggregate([ 
+    {$lookup:  {
+    from: &quot;order&quot;, 
+    localField: &quot;customerId&quot;, 
+    foreignField: &quot;customerId&quot;, 
+    as: &quot;customerOrder&quot; 
+    }
+  }
+ ])
+</code></pre>
+<pre><code>&gt; db.customer.aggregate([
+... {$lookup:  {
+... from: &quot;order&quot;,
+... localField: &quot;customerId&quot;,
+... foreignField: &quot;customerId&quot;,
+... as: &quot;customerOrder&quot;
+... }
+...   }
+...  ])
+{ &quot;_id&quot; : ObjectId(&quot;624db55c64f997879be8a9ef&quot;), &quot;customerCode&quot; : 1, &quot;name&quot; : &quot;customer1&quot;, &quot;phone&quot; : &quot;13112345678&quot;, &quot;address&quot; : &quot;test1&quot;, &quot;customerOrder&quot; : [ { &quot;_id&quot; : ObjectId(&quot;624db5b964f997879be8a9f1&quot;), &quot;orderId&quot; : 1, &quot;orderCode&quot; : &quot;order001&quot;, &quot;customerCode&quot; : 1, &quot;price&quot; : 200 }, { &quot;_id&quot; : ObjectId(&quot;624db5c064f997879be8a9f2&quot;), &quot;orderId1&quot; : 2, &quot;orderCode&quot; : &quot;order002&quot;, &quot;customerCode&quot; : 2, &quot;price&quot; : 400 } ] }
+{ &quot;_id&quot; : ObjectId(&quot;624db56164f997879be8a9f0&quot;), &quot;customerCode&quot; : 2, &quot;name&quot; : &quot;customer2&quot;, &quot;phone&quot; : &quot;13112345679&quot;, &quot;address&quot; : &quot;test2&quot;, &quot;customerOrder&quot; : [ { &quot;_id&quot; : ObjectId(&quot;624db5b964f997879be8a9f1&quot;), &quot;orderId&quot; : 1, &quot;orderCode&quot; : &quot;order001&quot;, &quot;customerCode&quot; : 1, &quot;price&quot; : 200 }, { &quot;_id&quot; : ObjectId(&quot;624db5c064f997879be8a9f2&quot;), &quot;orderId1&quot; : 2, &quot;orderCode&quot; : &quot;order002&quot;, &quot;customerCode&quot; : 2, &quot;price&quot; : 400 } ] }
+</code></pre>
+<p><strong><code>$lookup</code>:</strong></p>
+<pre><code>db.customer.aggregate([ 
+    {$lookup:  {
+    from: &quot;customer&quot;, 
+    localField: &quot;customerCode&quot;, 
+    foreignField: &quot;customerCode&quot;, 
+    as: &quot;customer&quot; 
+    }
+  },
+    {$lookup:  {
+        from: &quot;orderItem&quot;, 
+        localField: &quot;orderId&quot;, 
+        foreignField: &quot;orderId&quot;, 
+        as: &quot;orderItem&quot; 
+    }
+  }  
+])
+</code></pre>
+<pre><code>{ &quot;_id&quot; : ObjectId(&quot;624db55c64f997879be8a9ef&quot;), &quot;customerCode&quot; : 1, &quot;name&quot; : &quot;customer1&quot;, &quot;phone&quot; : &quot;13112345678&quot;, &quot;address&quot; : &quot;test1&quot;, &quot;customer&quot; : [ { &quot;_id&quot; : ObjectId(&quot;624db55c64f997879be8a9ef&quot;), &quot;customerCode&quot; : 1, &quot;name&quot; : &quot;customer1&quot;, &quot;phone&quot; : &quot;13112345678&quot;, &quot;address&quot; : &quot;test1&quot; } ], &quot;orderItem&quot; : [ ] }
+{ &quot;_id&quot; : ObjectId(&quot;624db56164f997879be8a9f0&quot;), &quot;customerCode&quot; : 2, &quot;name&quot; : &quot;customer2&quot;, &quot;phone&quot; : &quot;13112345679&quot;, &quot;address&quot; : &quot;test2&quot;, &quot;customer&quot; : [ { &quot;_id&quot; : ObjectId(&quot;624db56164f997879be8a9f0&quot;), &quot;customerCode&quot; : 2, &quot;name&quot; : &quot;customer2&quot;, &quot;phone&quot; : &quot;13112345679&quot;, &quot;address&quot; : &quot;test2&quot; } ], &quot;orderItem&quot; : [ ] }
+</code></pre>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021-9999 Jacob Xi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>

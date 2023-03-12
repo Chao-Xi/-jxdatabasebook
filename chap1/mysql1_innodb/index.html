@@ -1,0 +1,2855 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      
+        <link rel="prev" href="../6mysql_transaction_isolation/">
+      
+      
+        <link rel="next" href="../mysql3_transaction/">
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>第七节 "Shallow Dive" MySQL 和 InnoDB - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#shallow-dive-mysql-innodb" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第七节 "Shallow Dive" MySQL 和 InnoDB
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          MySQL 基础篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          第七节 "Shallow Dive" MySQL 和 InnoDB
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        第七节 "Shallow Dive" MySQL 和 InnoDB
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    1 数据库的定义
+  </a>
+  
+    <nav class="md-nav" aria-label="1 数据库的定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-1" class="md-nav__link">
+    1-1 数据库和实例
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-mysql" class="md-nav__link">
+    2 MySQL 的架构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    3 数据的存储
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    4 如何存储表
+  </a>
+  
+    <nav class="md-nav" aria-label="4 如何存储表">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-frm-for" class="md-nav__link">
+    4-1 .frm 文件 for 表的定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-ibd-for" class="md-nav__link">
+    4-2 .ibd 文件 for 数据索引
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    5 如何存储记录
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    6 行溢出数据
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    7 数据页结构
+  </a>
+  
+    <nav class="md-nav" aria-label="7 数据页结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-fil-headerfil-trailer-page-headerpage-directory" class="md-nav__link">
+    1. Fil Header/Fil Trailer / Page Header/Page Directory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-infimum-supremum" class="md-nav__link">
+    2. Infimum / Supremum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-user-records-free-space" class="md-nav__link">
+    3. User Records / Free Space
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    8 索引
+  </a>
+  
+    <nav class="md-nav" aria-label="8 索引">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    9 索引的数据结构
+  </a>
+  
+    <nav class="md-nav" aria-label="9 索引的数据结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#b-b" class="md-nav__link">
+    B+ 树是平衡树，它查找任意节点所耗费的时间都是完全相同的，比较的次数就是 B+ 树的高度；😍
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    10 聚集索引和辅助索引
+  </a>
+  
+    <nav class="md-nav" aria-label="10 聚集索引和辅助索引">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-1" class="md-nav__link">
+    10-1 聚集索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-2" class="md-nav__link">
+    10-2 辅助索引
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    11 锁
+  </a>
+  
+    <nav class="md-nav" aria-label="11 锁">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    1 并发控制机制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    2 锁的种类
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    3 锁的粒度
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    12 锁的算法
+  </a>
+  
+    <nav class="md-nav" aria-label="12 锁的算法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-record-lock" class="md-nav__link">
+    1 Record Lock
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-gap-lock" class="md-nav__link">
+    2 Gap Lock
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-next-key-lock" class="md-nav__link">
+    3 Next-Key Lock
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Next-Key Lock">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#next-key" class="md-nav__link">
+    Next-Key 锁锁定的是当前值和前面的范围。
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    4 死锁的发生
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    13 事务与隔离级别
+  </a>
+  
+    <nav class="md-nav" aria-label="13 事务与隔离级别">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_2" class="md-nav__link">
+    1 几种隔离级别
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    2 脏读
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_2" class="md-nav__link">
+    3 不可重复读
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_2" class="md-nav__link">
+    4 幻读
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mysql3_transaction/" class="md-nav__link">
+        第八节 "Shallow Dive" MySQL 中事务的实现(`transaction`)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mysql2_index/" class="md-nav__link">
+        第九节 "Shallow Dive" MySQL 索引设计概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mysql5_btree/" class="md-nav__link">
+        第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mysql_bia_review/" class="md-nav__link">
+        MySQL 基础知识复习
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          MySQL 实战篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 实战篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/1table_design/" class="md-nav__link">
+        L1 表结构设计篇 - 数据类型
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/2table_design/" class="md-nav__link">
+        L2 表结构设计篇 - 表设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/3table_index/" class="md-nav__link">
+        L3 索引优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/4table_query/" class="md-nav__link">
+        L4 查询优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/5db_perf_replica/" class="md-nav__link">
+        L5 高可用架构 - MySQL 复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/6db_ha/" class="md-nav__link">
+        L6 MySQL高可用架构
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/7Dist_db/" class="md-nav__link">
+        L7 分布式架构篇
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/9Mysql_copy/" class="md-nav__link">
+        L8 MySQL的零拷贝技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/8opt_int/" class="md-nav__link">
+        L8 Operation Interview
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          AWS Aurora 技术与实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aurora/3Aurora_operation/" class="md-nav__link">
+        第三节 Aurora Basic Operation
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          MySQL on K8S
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/2mysql_Master_slave/" class="md-nav__link">
+        第二节 在K8s中部署主从结构的MySQL服务
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          MySQL 基础操作篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础操作篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/1db_intro/" class="md-nav__link">
+        第一节 数据库简介、及常用数据库介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/2db_install/" class="md-nav__link">
+        第二节 安装 MySQL Repository & Jam db install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/3db_sql/" class="md-nav__link">
+        第三节 结构化查询语言 SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/4db_sql_ops1/" class="md-nav__link">
+        第四节 MySQL 操作实例(上)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/5db_sql_ops2/" class="md-nav__link">
+        第五节 MySQL 操作实例(中)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/6db_sql_ops3/" class="md-nav__link">
+        第六节 Mysql操作实例(下)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/7db_type/" class="md-nav__link">
+        第七节 MySQL 数据类型约束
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/8db_index/" class="md-nav__link">
+        第八节 MySQL 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/9db_mgt/" class="md-nav__link">
+        第九节 MySQL 的用户管理和权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/10db_logs/" class="md-nav__link">
+        第十节 MySQL 日志管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/11db_backup/" class="md-nav__link">
+        第十一节 MySQL备份概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/13db_xtrabackup/" class="md-nav__link">
+        第十二节 MySQL逻辑备份mysqldump
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/14mysql_replicate/" class="md-nav__link">
+        第十四节 MySQL 主从复制原理介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/15mysql_master_slave/" class="md-nav__link">
+        第十五节 MySQL 传统主从同步配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/16mysq_gtid/" class="md-nav__link">
+        第十六节 MySQL 基于 GTID 的主从复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/17ops_review/" class="md-nav__link">
+        Mysql OPS Review
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/18review_short/" class="md-nav__link">
+        SQL操作精简版
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          MongoDB 操作实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 操作实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/1mongodb_intro/" class="md-nav__link">
+        1 MongoDB介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/2mongodb_install/" class="md-nav__link">
+        2 MongoDB 快速安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/3mongodb_k8s_cluster/" class="md-nav__link">
+        3 在 Kubernetes 上编排 MongoDB 集群
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/4mongodb_opt/" class="md-nav__link">
+        4 MongoDB文档操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/5mongodb_springbboot/" class="md-nav__link">
+        5 MongoDB整合SpringBoot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/6mongodb_pip/" class="md-nav__link">
+        6 MongoDB 聚合操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/7mongodb_pip2/" class="md-nav__link">
+        7 MongoDB聚合操作高级操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/8mongodb_view/" class="md-nav__link">
+        8 MongoDB视图
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/9mongodb_index/" class="md-nav__link">
+        9 MongoDB索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/10mongodb_index_adv/" class="md-nav__link">
+        10 索引属性
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/11mongodb_explain/" class="md-nav__link">
+        11 explain执行计划详解
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          MongoDB 高级实战教程(全)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 高级实战教程(全)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/1mon_intro_install/" class="md-nav__link">
+        1 认识文档数据库 MongoDB & 及数据安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/2mon_command/" class="md-nav__link">
+        2 MongoDB 基本操作及聚合操作实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/3mon_rep/" class="md-nav__link">
+        3 复制集机制及原理 & 实现
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/4mon_tools/" class="md-nav__link">
+        4 MongoDB 全家桶
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/5mon_design/" class="md-nav__link">
+        5 Mongo 模型设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/6mon_red_write/" class="md-nav__link">
+        6 MongoDB 事务开发
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/7mon_changestream_bestdesign/" class="md-nav__link">
+        7 MongoDB Change Stream & 开发最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/8mon_shard/" class="md-nav__link">
+        8 Mongo Shards分片技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/9mon_monitor/" class="md-nav__link">
+        9 MongoDB 监控最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/10mon_bakup_restore/" class="md-nav__link">
+        10 MongoDB 备份与恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/11mon_sec/" class="md-nav__link">
+        11 MongoDB 安全设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/12mon_index/" class="md-nav__link">
+        12 MongoDB 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/13mon_perf/" class="md-nav__link">
+        13 MongoDB 性能
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/14mon_cluster/" class="md-nav__link">
+        14 高级集群设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/15mon_goonline/" class="md-nav__link">
+        15 MongoDB上线及升级
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/16mon_sample/" class="md-nav__link">
+        16 MongoDB 应用实例和场景
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/17mon_dms/" class="md-nav__link">
+        17 数据迁移
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/18mon_spark/" class="md-nav__link">
+        18 MongoDB + Spark实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/19mon_sql/" class="md-nav__link">
+        19 MongoDB SQL 套接件
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/20MongoDB_mico_middle_service/" class="md-nav__link">
+        20 MongoDB 与微服务 & 数据中台
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          PostgresSQL 12.6运维入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          PostgresSQL 12.6运维入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/2pg_intall/" class="md-nav__link">
+        1 PostgreSQL介绍&安装&链接管理&用户权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/3pg_cmd/" class="md-nav__link">
+        2 常用基础命令介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_logs/" class="md-nav__link">
+        3 Online WAL[Write Head Log]日志（redo)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_stru/" class="md-nav__link">
+        4 体系结构介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/5pg_bak/" class="md-nav__link">
+        5 备份恢复恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/6pg_repl/" class="md-nav__link">
+        6 Master-Slave流复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/7pg_ops/" class="md-nav__link">
+        7 有用的系统函数
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/1pg_int/" class="md-nav__link">
+        PostgreSQL Interview Questions 2022
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          AWS DB OTHERs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          AWS DB OTHERs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/1aws_neptune/" class="md-nav__link">
+        L1 深入了解 Amazon Neptune 图数据库技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/2dydb1/" class="md-nav__link">
+        L2 分布式键值存储 Dynamo 的实现原理
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          Extra 知识扩展
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    1 数据库的定义
+  </a>
+  
+    <nav class="md-nav" aria-label="1 数据库的定义">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-1" class="md-nav__link">
+    1-1 数据库和实例
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-mysql" class="md-nav__link">
+    2 MySQL 的架构
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3" class="md-nav__link">
+    3 数据的存储
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4" class="md-nav__link">
+    4 如何存储表
+  </a>
+  
+    <nav class="md-nav" aria-label="4 如何存储表">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-frm-for" class="md-nav__link">
+    4-1 .frm 文件 for 表的定义
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-ibd-for" class="md-nav__link">
+    4-2 .ibd 文件 for 数据索引
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5" class="md-nav__link">
+    5 如何存储记录
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6" class="md-nav__link">
+    6 行溢出数据
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7" class="md-nav__link">
+    7 数据页结构
+  </a>
+  
+    <nav class="md-nav" aria-label="7 数据页结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-fil-headerfil-trailer-page-headerpage-directory" class="md-nav__link">
+    1. Fil Header/Fil Trailer / Page Header/Page Directory
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-infimum-supremum" class="md-nav__link">
+    2. Infimum / Supremum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-user-records-free-space" class="md-nav__link">
+    3. User Records / Free Space
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8" class="md-nav__link">
+    8 索引
+  </a>
+  
+    <nav class="md-nav" aria-label="8 索引">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#9" class="md-nav__link">
+    9 索引的数据结构
+  </a>
+  
+    <nav class="md-nav" aria-label="9 索引的数据结构">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#b-b" class="md-nav__link">
+    B+ 树是平衡树，它查找任意节点所耗费的时间都是完全相同的，比较的次数就是 B+ 树的高度；😍
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10" class="md-nav__link">
+    10 聚集索引和辅助索引
+  </a>
+  
+    <nav class="md-nav" aria-label="10 聚集索引和辅助索引">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#10-1" class="md-nav__link">
+    10-1 聚集索引
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#10-2" class="md-nav__link">
+    10-2 辅助索引
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    11 锁
+  </a>
+  
+    <nav class="md-nav" aria-label="11 锁">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_1" class="md-nav__link">
+    1 并发控制机制
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2" class="md-nav__link">
+    2 锁的种类
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_1" class="md-nav__link">
+    3 锁的粒度
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    12 锁的算法
+  </a>
+  
+    <nav class="md-nav" aria-label="12 锁的算法">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-record-lock" class="md-nav__link">
+    1 Record Lock
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-gap-lock" class="md-nav__link">
+    2 Gap Lock
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-next-key-lock" class="md-nav__link">
+    3 Next-Key Lock
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Next-Key Lock">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#next-key" class="md-nav__link">
+    Next-Key 锁锁定的是当前值和前面的范围。
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_1" class="md-nav__link">
+    4 死锁的发生
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    13 事务与隔离级别
+  </a>
+  
+    <nav class="md-nav" aria-label="13 事务与隔离级别">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1_2" class="md-nav__link">
+    1 几种隔离级别
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2_1" class="md-nav__link">
+    2 脏读
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3_2" class="md-nav__link">
+    3 不可重复读
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4_2" class="md-nav__link">
+    4 幻读
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="shallow-dive-mysql-innodb"><strong>第七节 "Shallow Dive" MySQL 和 InnoDB</strong></h1>
+<ul>
+<li>数据库的定义</li>
+<li>MySQL 的架构</li>
+<li>数据的存储</li>
+<li>如何存储表</li>
+<li>如何存储记录</li>
+<li>行溢出数据</li>
+<li>数据页结构</li>
+<li>索引</li>
+<li>聚集索引和辅助索引</li>
+<li>锁</li>
+<li>锁的算法</li>
+<li>事务与隔离级别</li>
+</ul>
+<p>作为一名开发人员，在日常的工作中会难以避免地接触到数据库，无论是基于文件的 sqlite 还是工程上使用非常广泛的 MySQL、PostgreSQL.</p>
+<p>本文中对于数据库的介绍以及研究都是在 MySQL 上进行的，如果涉及到了其他数据库的内容或者实现会在文中单独指出。</p>
+<h2 id="1"><strong>1 数据库的定义</strong></h2>
+<p>很多开发者在最开始时其实都对数据库有一个比较模糊的认识，觉得数据库就是一堆数据的集合，但是实际却比这复杂的多，数据库领域中有两个词非常容易混淆，也就是<strong>数据库</strong>和<strong>实例</strong>：</p>
+<ul>
+<li><strong>数据库</strong>：物理操作文件系统或其他形式文件类型的集合；</li>
+<li><strong>实例</strong>：<code>MySQL</code> 数据库由后台线程以及一个共享内存区组成；</li>
+</ul>
+<h3 id="1-1"><strong>1-1 数据库和实例</strong></h3>
+<p>在 <code>MySQL</code> 中，实例和数据库往往都是一一对应的，而我们也无法直接操作数据库，而是要通过数据库实例来操作数据库文件，<strong>可以理解为数据库实例是数据库为上层提供的一个专门用于操作的接口</strong>。</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_2.png" title="Body image" /></p>
+<p>在 <code>Unix</code> 上，启动一个 <code>MySQL</code> 实例往往会<strong>产生两个进程</strong>，</p>
+<ul>
+<li><strong><code>mysqld</code> 就是真正的数据库服务守护进程</strong></li>
+<li><strong>而 <code>mysqld_safe</code> 是一个用于检查和设置 <code>mysqld</code> 启动的控制程序，它负责监控 MySQL 进程的执行</strong>，当 <code>mysqld</code> 发生错误时，<code>mysqld_safe</code> 会对其状态进行检查并在合适的条件下重启。</li>
+</ul>
+<h2 id="2-mysql"><strong>2 MySQL 的架构</strong></h2>
+<p>MySQL 从第一个版本发布到现在已经有了 20 多年的历史，在这么多年的发展和演变中，整个应用的体系结构变得越来越复杂：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_3.png" title="Body image" /></p>
+<ul>
+<li>最上层用于连接、线程处理的部分并不是 MySQL 『发明』的，很多服务都有类似的组成部分；</li>
+<li>第二层中包含了大多数 MySQL 的核心服务，包括了对 <code>SQL</code> 的解析、分析、优化和缓存等功能，存储过程、触发器和视图都是在这里实现的；</li>
+<li><strong>而第三层就是 <code>MySQL</code> 中真正负责数据的存储和提取的存储引擎</strong>，例如：<code>InnoDB</code>、<code>MyISAM</code> 等，文中对存储引擎的介绍都是对 <code>InnoDB</code> 实现的分析。</li>
+</ul>
+<h2 id="3"><strong>3 数据的存储</strong></h2>
+<p>在整个数据库体系结构中，我们可以使用不同的存储引擎来存储数据，<strong>而绝大多数存储引擎都以二进制的形式存储数据</strong>；这一节会介绍 InnoDB 中对数据是如何存储的。</p>
+<p>在 <code>InnoDB</code> 存储引擎中，<strong>所有的数据都被逻辑地存放在表空间中，表空间（<code>tablespace</code>）是存储引擎中最高的存储逻辑单位，在表空间的下面又包括段（<code>segment</code>）、区（<code>extent</code>）、页（<code>page</code>）</strong></p>
+<p><img alt="Alt Image Text" src="../../images/ms1_4.png" title="Body image" /></p>
+<p>同一个数据库实例的所有表空间都有相同的页大小；</p>
+<p>默认情况下，<strong>表空间中的页大小都为 <code>16KB</code>，当然也可以通过改变 <code>innodb_page_size</code> 选项对默认大小进行修改，需要注意的是不同的页大小最终也会导致区大小的不同</strong>：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_5.png" title="Body image" /></p>
+<p>从图中可以看出，在 <code>InnoDB</code> 存储引擎中，一个区的大小最小为 <code>1MB</code>，页的数量最少为 <code>64</code> 个。</p>
+<h2 id="4"><strong>4 如何存储表</strong></h2>
+<p>MySQL 使用 <code>InnoDB</code> 存储表时，会将<strong>表的定义</strong>和<strong>数据索引</strong>等信息分开存储，其中前者存储在 <code>.frm</code> 文件中，后者存储在 <code>.ibd</code> 文件中，这一节就会对这两种不同的文件分别进行介绍。</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_6.png" title="Body image" /></p>
+<h3 id="4-1-frm-for"><strong>4-1 <code>.frm 文件</code> for 表的定义</strong></h3>
+<p>无论在 <code>MySQL</code> 中选择了哪个存储引擎，所有的<code>MySQL</code> 表都会在硬盘上创建一个 <code>.frm</code>文件用来描述表的格式或者说定义；<code>.frm</code> 文件的格式在不同的平台上都是相同的。</p>
+<pre><code>CREATE TABLE test_frm(
+    column1 CHAR(5),
+    column2 INTEGER
+);
+</code></pre>
+<p>当我们使用上面的代码创建表时，<strong>会在磁盘上的 <code>datadir</code> 文件夹中生成一个 <code>test_frm.frm</code> 的文件，这个文件中就包含了表结构相关的信息</strong>：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_7.png" title="Body image" /></p>
+<h3 id="4-2-ibd-for"><strong>4-2 <code>.ibd</code> 文件 for 数据索引</strong></h3>
+<p><code>InnoDB</code> 中用于存储数据的文件总共有两个部分，<strong>一是系统表空间文件，包括 <code>ibdata1</code>、<code>ibdata2</code> 等文件，其中存储了 <code>InnoDB</code> 系统信息和用户数据库表数据和索引</strong>，是所有表公用的。</p>
+<h2 id="5"><strong>5 如何存储记录</strong></h2>
+<p>与现有的大多数存储引擎一样，<strong><code>InnoDB</code> 使用页作为磁盘管理的最小单位</strong>；</p>
+<p><strong>数据在 <code>InnoDB</code> 存储引擎中都是按行存储的，每个 <code>16KB</code> 大小的页中可以存放 <code>2-200</code> 行的记录</strong>。</p>
+<p>当 InnoDB 存储数据时，它可以使用不同的行格式进行存储；MySQL 5.7 版本支持以下格式的行存储方式：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_8.png" title="Body image" /></p>
+<blockquote>
+<p><code>Antelope</code> 是 <code>InnoDB</code> 最开始支持的文件格式，它包含两种行格式 <code>Compact</code> 和 <code>Redundant</code>，它最开始并没有名字；</p>
+<p><code>Antelope</code> 的名字是在新的文件格式 <code>Barracuda</code> 出现后才起的，<code>Barracuda</code> 的出现引入了两种新的行格式 <code>Compressed</code> 和 <code>Dynamic</code>；</p>
+<p><code>InnoDB</code> 对于文件格式都会向前兼容，而官方文档中也对之后会出现的新文件格式预先定义好了名字：<code>Cheetah</code>、<code>Dragon</code>、<code>Elk</code> 等等。</p>
+</blockquote>
+<p>两种行记录格式 <code>Compact</code> 和 <code>Redundant</code> 在磁盘上按照以下方式存储：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_9.png" title="Body image" /></p>
+<p><code>Compact</code> 和 <code>Redundant</code> 格式最大的不同就是记录格式的第一个部分；</p>
+<ul>
+<li>在 <code>Compact</code> 中，行记录的第一部分倒序存放了一行数据中列的长度（<code>Length</code>），</li>
+<li>而 <code>Redundant</code> 中存的是每一列的偏移量（<code>Offset</code>）</li>
+</ul>
+<p><strong>从总体上上看，<code>Compact</code> 行记录格式相比 <code>Redundant</code> 格式能够减少 <code>20%</code> 的存储空间。</strong></p>
+<h2 id="6"><strong>6 行溢出数据</strong></h2>
+<p>当 <code>InnoDB</code> 使用 <code>Compact</code> 或者 <code>Redundant</code> 格式存储极长的 <code>VARCHAR</code> 或者 <code>BLOB</code> 这类大对象时，<strong>我们并不会直接将所有的内容都存放在数据页节点中，而是将行数据中的前 <code>768</code> 个字节存储在数据页中，后面会通过偏移量指向溢出页。</strong></p>
+<p><img alt="Alt Image Text" src="../../images/ms1_10.png" title="Body image" /></p>
+<p><strong>但是当我们使用新的行记录格式 <code>Compressed</code> 或者 <code>Dynamic</code> 时都只会在行记录中保存 <code>20</code> 个字节的指针，实际的数据都会存放在溢出页面中</strong>。</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_11.png" title="Body image" /></p>
+<p>当然在实际存储中，可能会对不同长度的 <code>TEXT</code> 和 <code>BLOB</code> 列进行优化，不过这就不是本文关注的重点了。</p>
+<h2 id="7"><strong>7 数据页结构</strong></h2>
+<ul>
+<li><strong>页(<code>Page</code>)</strong>是 <code>InnoDB</code> 存储引擎管理数据的最小磁盘单位，</li>
+<li><strong>而 <code>B-Tree</code> 节点就是实际存放表中数据的页面</strong>，我们在这里将要介绍页是如何组织和存储记录的；</li>
+</ul>
+<p>首先，一个 <code>InnoDB</code> 页有以下七个部分：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_12.png" title="Body image" /></p>
+<h3 id="1-fil-headerfil-trailer-page-headerpage-directory"><strong>1. <code>Fil Header/Fil Trailer</code> / <code>Page Header/Page Directory</code></strong></h3>
+<ul>
+<li>每一个页中包含了两对 <code>header/trailer</code>：</li>
+<li>内部的 <code>Page Header/Page Directory</code> 关心的是<strong>页的状态信息</strong></li>
+<li>而 <code>Fil Header/Fil Trailer</code> 关心的是<strong>记录页的头信息</strong>。</li>
+</ul>
+<h3 id="2-infimum-supremum"><strong>2. <code>Infimum</code> / <code>Supremum</code></strong></h3>
+<p>在页的头部和尾部之间就是用户记录和空闲空间了，每一个数据页中都包含 <code>Infimum</code> 和 <code>Supremum</code> 这两个虚拟的记录（可以理解为占位符），</p>
+<ul>
+<li><code>Infimum</code> <strong>记录是比该页中任何主键值都要小的值</strong></li>
+<li><code>Supremum</code> <strong>是该页中的最大值</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/ms1_13.png" title="Body image" /></p>
+<h3 id="3-user-records-free-space"><strong>3. <code>User Records</code> / <code>Free Space</code></strong></h3>
+<ul>
+<li><code>User Records</code> <strong>就是整个页面中真正用于存放行记录的部分</strong>，</li>
+<li><code>Free Space</code> <strong>就是空余空间了，它是一个链表的数据结构</strong>，</li>
+</ul>
+<p>为了保证插入和删除的效率，整个页面并不会按照主键顺序对所有记录进行排序，它会自动从左侧向右寻找空白节点进行插入，行记录在物理存储上并不是按照顺序的，它们之间的顺序是由 <code>next_record</code> 这一指针控制的。</p>
+<p>InnoDB 存储引擎中对数据的存储是一个非常复杂的话题，这一节中也只是对表、行记录以及页面的存储进行一定的分析和介绍，虽然作者相信这部分知识对于大部分开发者已经足够了，但是想要真正消化这部分内容还需要很多的努力和实践。</p>
+<h2 id="8"><strong>8 索引</strong></h2>
+<p>索引是数据库中非常非常重要的概念，它是存储引擎能够快速定位记录的秘密武器，对于提升数据库的性能、减轻数据库服务器的负担有着非常重要的作用；<strong>索引优化是对查询性能优化的最有效手段</strong>，它能够轻松地将查询的性能提高几个数量级。</p>
+<h3 id="9"><strong>9 索引的数据结构</strong></h3>
+<p>在上一节中，我们谈了行记录的存储和页的存储，在这里我们就要从更高的层面看 InnoDB 中对于数据是如何存储的；</p>
+<p><strong><code>InnoDB</code> 存储引擎在绝大多数情况下使用 <code>B+</code> 树建立索引，这是关系型数据库中查找最为常用和有效的索引</strong></p>
+<p><strong>但是 <code>B+</code> 树索引并不能找到一个给定键对应的具体值，它只能找到数据行对应的页，然后正如上一节所提到的，数据库把整个页读入到内存中，并在内存中查找具体的数据行</strong>。</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_14.png" title="Body image" /></p>
+<h4 id="b-b"><code>B+</code> 树是平衡树，它查找任意节点所耗费的时间都是完全相同的，比较的次数就是 <code>B+</code> 树的高度；😍</h4>
+<p>在这里，我们并不会深入分析或者动手实现一个 B+ 树，只是对它的特性进行简单的介绍。</p>
+<h2 id="10"><strong>10 聚集索引和辅助索引</strong></h2>
+<p>数据库中的 <code>B+</code> 树索引可以分为聚集索引（<code>clustered index</code>）和辅助索引（<code>secondary index</code>），它们之间的最大区别就是: </p>
+<ul>
+<li><strong>聚集索引中存放着一条行记录的全部信息</strong></li>
+<li><strong>辅助索引中只包含索引列和一个用于查找对应行记录的『书签』</strong></li>
+</ul>
+<h3 id="10-1"><strong>10-1 聚集索引</strong></h3>
+<p><code>InnoDB</code> 存储引擎中的表都是使用索引组织的，<strong>也就是按照键的顺序存放</strong>；</p>
+<p><strong>聚集索引就是按照表中主键的顺序构建一颗 <code>B+</code> 树，并在叶节点中存放表中的行记录数据</strong>。</p>
+<pre><code>CREATE TABLE users(
+    id INT NOT NULL,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL,
+    age INT NOT NULL,
+    PRIMARY KEY(id),
+    KEY(last_name, first_name, age)
+    KEY(first_name)
+);
+</code></pre>
+<p>如果使用上面的 <code>SQL</code> 在数据库中创建一张表，<strong><code>B+</code> 树就会使用 <code>id</code> 作为索引的键，并在叶子节点中存储一条记录中的<code>所有</code>信息</strong>。</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_15.png" title="Body image" /></p>
+<blockquote>
+<p>图中对 B+ 树的描述与真实情况下 B+ 树中的数据结构有一些差别，不过这里想要表达的主要意思是：聚集索引叶节点中保存的是整条行记录，而不是其中的一部分。</p>
+</blockquote>
+<p>聚集索引与表的物理存储方式有着非常密切的关系，所有正常的表应该<strong>有且仅有一个</strong>聚集索引（绝大多数情况下都是主键），表中的所有行记录数据都是按照<strong>聚集索引</strong>的顺序存放的。</p>
+<p>当我们使用聚集索引对表中的数据进行检索时，可以直接获得聚集索引所对应的整条行记录数据所在的页，不需要进行第二次操作。</p>
+<h3 id="10-2"><strong>10-2 辅助索引</strong></h3>
+<p><strong>数据库将所有的非聚集索引都划分为辅助索引</strong>，但是这个概念对我们理解辅助索引并没有什么帮助；</p>
+<p>辅助索引也是通过 B+ 树实现的，<strong>但是它的叶节点并不包含行记录的全部数据，仅包含索引中的所有键和一个用于查找对应行记录的『书签』</strong>，在 <code>InnoDB</code> 中这个书签就是当前记录的主键。</p>
+<p><mark>辅助索引的存在并不会影响聚集索引</mark>，<strong>因为聚集索引构成的 <code>B+</code>树是数据实际存储的形式，而辅助索引只用于加速数据的查找，所以一张表上往往有多个辅助索引以此来提升数据库的性能</strong>。</p>
+<blockquote>
+<p>一张表一定包含一个聚集索引构成的 B+ 树以及若干辅助索引的构成的 B+ 树。</p>
+</blockquote>
+<p><img alt="Alt Image Text" src="../../images/ms1_16.png" title="Body image" /></p>
+<p>如果在表 <code>users</code> 中存在一个辅助索引 (<code>first_name, age</code>)，那么它构成的 <code>B+</code> 树大致就是上图这样，<strong>按照 (<code>first_name, age</code>) 的字母顺序对表中的数据进行排序，当查找到主键时，再通过聚集索引获取到整条行记录</strong>。</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_17.png" title="Body image" /></p>
+<p>上图展示了一个使用辅助索引查找一条表记录的过程：</p>
+<ul>
+<li>通过辅助索引查找到对应的主键，</li>
+<li>最后在聚集索引中使用主键获取对应的行记录，这也是通常情况下行记录的查找方式。</li>
+</ul>
+<h2 id="11"><strong>11 锁</strong></h2>
+<p>我们都知道锁的种类一般分为乐观锁和悲观锁两种，InnoDB 存储引擎中使用的就是悲观锁，而按照锁的粒度划分，也可以分成行锁和表锁。</p>
+<h3 id="1_1"><strong>1 并发控制机制</strong></h3>
+<p>乐观锁和悲观锁其实都是并发控制的机制，同时它们在原理上就有着本质的差别；</p>
+<ul>
+<li>乐观锁是一种思想，它其实并不是一种真正的『锁』，它会先尝试对资源进行修改，在写回时判断资源是否进行了改变，如果没有发生改变就会写回，否则就会进行重试，在整个的执行过程中其实<strong>都没有对数据库进行加锁</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/ms1_18.png" title="Body image" /></p>
+<ul>
+<li>悲观锁就是一种真正的锁了，它会在获取资源前对资源进行加锁，确保同一时刻只有有限的线程能够访问该资源，其他想要尝试获取资源的操作都会进入等待状态，直到该线程完成了对资源的操作并且释放了锁后，其他线程才能重新操作资源；</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/ms1_19.png" title="Body image" /></p>
+<p>虽然乐观锁和悲观锁在本质上并不是同一种东西，<strong>一个是一种思想，另一个是一种真正的锁，但是它们都是一种并发控制机制</strong>。</p>
+<p>乐观锁不会存在死锁的问题，但是由于更新后验证，所以当<strong>冲突频率</strong>和<strong>重试成本</strong>较高时更推荐使用悲观锁，而需要非常高的<strong>响应速度</strong>并且<strong>并发量非常大</strong>的时候使用乐观锁就能较好的解决问题，在这时使用悲观锁就可能出现严重的性能问题；在选择并发控制机制时，需要综合考虑上面的四个方面</p>
+<ul>
+<li>冲突频率、</li>
+<li>重试成本、</li>
+<li>响应速度</li>
+<li>并发量</li>
+</ul>
+<p>进行选择。</p>
+<h3 id="2"><strong>2 锁的种类</strong></h3>
+<p>对数据的操作其实只有两种，也就是读和写，而数据库在实现锁时，也会对这两种操作使用不同的锁；InnoDB 实现了标准的行级锁，也就是<strong>共享锁（<code>Shared Lock</code>）</strong> 和<strong>互斥锁（<code>Exclusive Lock</code>）</strong>；共享锁和互斥锁的作用其实非常好理解：</p>
+<ul>
+<li><strong>共享锁（读锁）</strong>：允许事务对一条行数据进行读取；</li>
+<li><strong>互斥锁（写锁）</strong>：允许事务对一条行数据进行删除或更新；</li>
+</ul>
+<p>而它们的名字也暗示着各自的另外一个特性，<strong>共享锁之间是兼容的，而互斥锁与其他任意锁都不兼容</strong>：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_20.png" title="Body image" /></p>
+<p>稍微对它们的使用进行思考就能想明白它们为什么要这么设计，因为共享锁代表了读操作、互斥锁代表了写操作，所以我们可以在数据库中<strong>并行读</strong>，但是只能<strong>串行写</strong>，</p>
+<p><strong>只有这样才能保证不会发生线程竞争，实现线程安全</strong>。</p>
+<h3 id="3_1"><strong>3 锁的粒度</strong></h3>
+<p>与上一节中提到的两种锁的种类相似的是，意向锁也分为两种：</p>
+<ul>
+<li><strong>意向共享锁</strong>：事务想要在获得表中某些记录的共享锁，需要在表上先加意向共享锁；</li>
+<li><strong>意向互斥锁</strong>：事务想要在获得表中某些记录的互斥锁，需要在表上先加意向互斥锁；</li>
+</ul>
+<p>随着意向锁的加入，锁类型之间的兼容矩阵也变得愈加复杂：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_21.png" title="Body image" /></p>
+<p>意向锁其实不会阻塞全表扫描之外的任何请求，它们的主要目的是为了表示是否有人请求锁定表中的某一行数据。</p>
+<blockquote>
+<p>有的人可能会对意向锁的目的并不是完全的理解，我们在这里可以举一个例子：如果没有意向锁，当已经有人使用行锁对表中的某一行进行修改时，如果另外一个请求要对全表进行修改，那么就需要对所有的行是否被锁定进行扫描，在这种情况下，效率是非常低的；不过，在引入意向锁之后，当有人使用行锁对表中的某一行进行修改之前，会先为表添加意向互斥锁（IX），再为行记录添加互斥锁（X），在这时如果有人尝试对全表进行修改就不需要判断表中的每一行数据是否被加锁了，只需要通过等待意向互斥锁被释放就可以了。</p>
+</blockquote>
+<h2 id="12"><strong>12 锁的算法</strong></h2>
+<p>到目前为止已经对 InnoDB 中锁的粒度有一定的了解，也清楚了在对数据库进行读写时会获取不同的锁，在这一小节将介绍锁是如何添加到对应的数据行上的，我们会分别介绍三种锁的算法：</p>
+<ul>
+<li><code>Record Lock</code>、</li>
+<li><code>Gap Lock</code></li>
+<li><code>Next-Key Lock</code></li>
+</ul>
+<h3 id="1-record-lock"><strong>1 Record Lock</strong></h3>
+<p>记录锁（<code>Record Lock</code>）是加到<strong>索引记录</strong>上的锁，假设我们存在下面的一张表 <code>users</code>：</p>
+<pre><code>CREATE TABLE users(
+    id INT NOT NULL AUTO_INCREMENT,
+    last_name VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255),
+    age INT,
+    PRIMARY KEY(id),
+    KEY(last_name),
+    KEY(age)
+);
+</code></pre>
+<p><strong>如果我们使用 <code>id</code> 或者 <code>last_name</code> 作为 <code>SQL</code> 中 <code>WHERE</code> 语句的过滤条件，那么 <code>InnoDB</code> 就可以通过索引建立的 <code>B+</code> 树找到行记录并添加索引</strong></p>
+<p><strong>但是如果使用 <code>first_name</code> 作为过滤条件时，由于 <code>InnoDB</code> 不知道待修改的记录具体存放的位置，也无法对将要修改哪条记录提前做出判断就会锁定整个表</strong>。</p>
+<h3 id="2-gap-lock"><strong>2 Gap Lock</strong></h3>
+<p>记录锁是在存储引擎中最为常见的锁，除了记录锁之外，</p>
+<p><strong><code>InnoDB</code>中还存在间隙锁（<code>Gap Lock</code>），间隙锁是对索引记录中的一段连续区域的锁；</strong></p>
+<p><strong>当使用类似 <code>SELECT * FROM users WHERE id BETWEEN 10 AND 20 FOR UPDATE;</code> 的 SQL 语句时，就会阻止其他事务向表中插入 <code>id = 15</code> 的记录，因为整个范围都被间隙锁锁定了</strong>。</p>
+<blockquote>
+<p>间隙锁是存储引擎对于性能和并发做出的权衡，并且只用于某些事务隔离级别。</p>
+</blockquote>
+<p>虽然间隙锁中也分为共享锁和互斥锁，不过它们之间并不是互斥的，也就是不同的事务可以同时持有一段相同范围的共享锁和互斥锁，它唯一阻止的就是<strong>其他事务向这个范围中添加新的记录</strong>。</p>
+<h3 id="3-next-key-lock"><strong>3 Next-Key Lock</strong></h3>
+<p>Next-Key 锁相比前两者就稍微有一些复杂，它是记录锁和记录前的间隙锁的结合，在 <code>users</code> 表中有以下记录：</p>
+<pre><code>+------|-------------|--------------|-------+
+|   id | last_name   | first_name   |   age |
+|------|-------------|--------------|-------|
+|    4 | stark       | tony         |    21 |
+|    1 | tom         | hiddleston   |    30 |
+|    3 | morgan      | freeman      |    40 |
+|    5 | jeff        | dean         |    50 |
+|    2 | donald      | trump        |    80 |
++------|-------------|--------------|-------+
+</code></pre>
+<p>如果使用 Next-Key 锁，那么 Next-Key 锁就可以在需要的时候锁定以下的范围：</p>
+<pre><code>(-∞, 21]
+(21, 30]
+(30, 40]
+(40, 50]
+(50, 80]
+(80, ∞)
+</code></pre>
+<blockquote>
+<p>既然叫 Next-Key 锁，锁定的应该是当前值和后面的范围，但是实际上却不是，</p>
+</blockquote>
+<h4 id="next-key"><strong><code>Next-Key</code> 锁锁定的是当前值和前面的范围</strong>。</h4>
+<p>当我们更新一条记录，比如 <code>SELECT * FROM users WHERE age = 30 FOR UPDATE;</code>，</p>
+<p><strong><code>InnoDB</code> 不仅会在范围 <code>(21, 30]</code>上加 <code>Next-Key</code> 锁，还会在这条记录后面的范围 <code>(30, 40]</code> 加间隙锁，所以插入<code>(21, 40]</code> 范围内的记录都会被锁定。</strong></p>
+<p>Next-Key 锁的作用其实是为了解决幻读的问题，我们会在下一节谈事务的时候具体介绍。</p>
+<h3 id="4_1"><strong>4 死锁的发生</strong></h3>
+<p>既然 InnoDB 中实现的锁是悲观的，那么不同事务之间就可能会互相等待对方释放锁造成死锁，最终导致事务发生错误；想要在 MySQL 中制造死锁的问题其实非常容易：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_22.png" title="Body image" /></p>
+<p>两个会话都持有一个锁，并且尝试获取对方的锁时就会发生死锁，不过 MySQL 也能在发生死锁时及时发现问题，并保证其中的一个事务能够正常工作，这对我们来说也是一个好消息。</p>
+<h2 id="13"><strong>13 事务与隔离级别</strong></h2>
+<p>在介绍了锁之后，我们再来谈谈数据库中一个非常重要的概念 —— 事务；相信只要是一个合格的软件工程师就对事务的特性有所了解，<strong>其中被人经常提起的就是事务的原子性，在数据提交工作时，要么保证所有的修改都能够提交，要么就所有的修改全部回滚</strong>。</p>
+<p>但是事务还遵循包括原子性在内的 ACID 四大特性：</p>
+<ul>
+<li>原子性（Atomicity）、</li>
+<li>一致性（Consistency）、</li>
+<li>隔离性（Isolation）</li>
+<li>持久性（Durability）；</li>
+</ul>
+<p>文章不会对这四大特性全部展开进行介绍，相信你能够通过 Google 和数据库相关的书籍轻松获得有关它们的概念，本文最后要介绍的就是事务的四种隔离级别。</p>
+<h3 id="1_2"><strong>1 几种隔离级别</strong></h3>
+<p>事务的隔离性是数据库处理数据的几大基础之一，而隔离级别其实就是提供给用户用于在性能和可靠性做出选择和权衡的配置项。</p>
+<p>ISO 和 ANIS SQL 标准制定了四种事务隔离级别，而 InnoDB 遵循了 SQL:1992 标准中的四种隔离级别：<code>READ UNCOMMITED</code>、<code>READ COMMITED</code>、<code>REPEATABLE READ</code> 和 <code>SERIALIZABLE</code>；每个事务的隔离级别其实都比上一级多解决了一个问题：</p>
+<ul>
+<li><code>RAED UNCOMMITED</code>：使用查询语句不会加锁，可能会读到未提交的行（<code>Dirty Read</code>）；</li>
+<li><code>READ COMMITED</code>：<strong>只对记录加记录锁，而不会在记录之间加间隙锁，所以允许新的记录插入到被锁定记录的附近</strong>，所以再多次使用查询语句时，可能得到不同的结果（<code>Non-Repeatable Read</code>）；</li>
+<li><strong><code>REPEATABLE READ</code>：多次读取同一范围的数据会返回第一次查询的快照，不会返回不同的数据行，但是可能发生幻读（<code>Phantom Read</code>)</strong></li>
+<li><code>SERIALIZABLE</code>：InnoDB 隐式地将全部的查询语句加上共享锁，解决了幻读的问题；</li>
+</ul>
+<p><strong>MySQL 中默认的事务隔离级别就是 <code>REPEATABLE READ</code>，但是它通过 <code>Next-Key</code> 锁也能够在某种程度上解决幻读的问题。</strong></p>
+<p><img alt="Alt Image Text" src="../../images/ms1_23.png" title="Body image" /></p>
+<p>接下来，我们将数据库中创建如下的表并通过个例子来展示在不同的事务隔离级别之下，会发生什么样的问题：</p>
+<pre><code>CREATE TABLE test(
+    id INT NOT NULL,
+    UNIQUE(id)
+);
+</code></pre>
+<h3 id="2_1"><strong>2 脏读</strong></h3>
+<blockquote>
+<p>在一个事务中，读取了其他事务未提交的数据。</p>
+</blockquote>
+<p><strong>当事务的隔离级别为 <code>READ UNCOMMITED</code> 时，我们在 <code>SESSION 2</code> 中插入的未提交数据在 <code>SESSION 1</code> 中是可以访问的。</strong></p>
+<p><img alt="Alt Image Text" src="../../images/ms1_24.png" title="Body image" /></p>
+<h3 id="3_2"><strong>3 不可重复读</strong></h3>
+<blockquote>
+<p>在一个事务中，同一行记录被访问了两次却得到了不同的结果。</p>
+</blockquote>
+<p>当事务的隔离级别为 <code>READ COMMITED</code> 时，虽然解决了脏读的问题，</p>
+<ul>
+<li>但是如果在 <code>SESSION 1</code> 先查询了一行数据，</li>
+<li>在这之后 <code>SESSION 2</code> 中修改了同一行数据并且提交了修改，<strong>在这时，如果 <code>SESSION 1</code> 中再次使用相同的查询语句，就会发现两次查询的结果不一样</strong>。</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/ms1_25.png" title="Body image" /></p>
+<p>不可重复读的原因就是，在 <code>READ COMMITED</code> 的隔离级别下，存储引擎不会在查询记录时添加行锁，锁定 <code>id = 3</code> 这条记录。</p>
+<h3 id="4_2"><strong>4 幻读</strong></h3>
+<blockquote>
+<p>在一个事务中，同一个范围内的记录被读取时，其他事务向这个范围添加了新的记录。</p>
+</blockquote>
+<p>重新开启了两个会话 <code>SESSION 1</code> 和 <code>SESSION 2</code>，</p>
+<ul>
+<li>在 <code>SESSION 1</code> 中我们查询全表的信息，没有得到任何记录；</li>
+<li>在 <code>SESSION 2</code> 中向表中插入一条数据并提交；</li>
+<li>由于 <code>REPEATABLE READ</code> 的原因，再次查询全表的数据时，我们获得到的仍然是空集，但是在向表中插入同样的数据却出现了错误。</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/ms1_26.png" title="Body image" /></p>
+<p>这种现象在数据库中就被称作幻读，<strong>虽然我们使用查询语句得到了一个空的集合，但是插入数据时却得到了错误，好像之前的查询是幻觉一样</strong>。</p>
+<p>在标准的事务隔离级别中，幻读是由更高的隔离级别 <code>SERIALIZABLE</code> 解决的，但是它也可以通过 <code>MySQL</code> 提供的 <code>Next-Key</code> 锁解决：</p>
+<p><img alt="Alt Image Text" src="../../images/ms1_27.png" title="Body image" /></p>
+<p><code>REPEATABLE READ</code> 和 <code>READ UNCOMMITED</code> 其实是矛盾的，如果保证了前者就看不到已经提交的事务，如果保证了后者，就会导致两次查询的结果不同，</p>
+<p><code>MySQL</code> 为我们提供了一种折中的方式，能够在 <code>REPEATABLE READ</code> 模式下加锁访问已经提交的数据，其本身并不能解决幻读的问题，而是通过文章前面提到的 <code>Next-Key</code> 锁来解决。</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021-9999 Jacob Xi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>

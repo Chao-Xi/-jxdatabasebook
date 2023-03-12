@@ -1,0 +1,2843 @@
+
+<!doctype html>
+<html lang="zh" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Jacob's Database 技术与实战教程">
+      
+      
+        <meta name="author" content="Jacob Xi">
+      
+      
+      
+        <link rel="prev" href="../2Aurora_Adv/">
+      
+      
+        <link rel="next" href="../../chap_k8s/1Mysql_k8s/">
+      
+      <link rel="icon" href="../../images/logo.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.2">
+    
+    
+      
+        <title>第三节 Aurora Basic Operation - Jacob DataBase Book</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7bf56d0a.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.a0c5b2b5.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="red" data-md-color-accent="red">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aurora-basic-operation" class="md-skip">
+          跳转至
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="页眉">
+    <a href="../.." title="Jacob DataBase Book" class="md-header__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Jacob DataBase Book
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              第三节 Aurora Basic Operation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="搜索" placeholder="搜索" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="查找">
+        
+        <button type="reset" class="md-search__icon md-icon" title="清空当前内容" aria-label="清空当前内容" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            正在初始化搜索引擎
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="导航栏" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Jacob DataBase Book" class="md-nav__button md-logo" aria-label="Jacob DataBase Book" data-md-component="logo">
+      
+  <img src="../../images/logo.png" alt="logo">
+
+    </a>
+    Jacob DataBase Book
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Chao-Xi/jxdatabasebook.git" title="前往仓库" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.3.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    jxdatabasebook
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Welcome
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          MySQL 基础篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/1mysql_exec/" class="md-nav__link">
+        第一节 基础架构：执行一条SQL查询语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/2mysql_logs/" class="md-nav__link">
+        第二节 日志系统：执行一条SQL更新语句
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/3mysql_isolaion/" class="md-nav__link">
+        第三节 事务隔离
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/4mysql_index/" class="md-nav__link">
+        第四节 深入浅出索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5mysql_lock/" class="md-nav__link">
+        第五节 全局锁和表锁
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/6mysql_transaction_isolation/" class="md-nav__link">
+        第六节 事务到底是隔离的还是不隔离的
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql1_innodb/" class="md-nav__link">
+        第七节 "Shallow Dive" MySQL 和 InnoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql3_transaction/" class="md-nav__link">
+        第八节 "Shallow Dive" MySQL 中事务的实现(`transaction`)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql2_index/" class="md-nav__link">
+        第九节 "Shallow Dive" MySQL 索引设计概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql4_index_perf/" class="md-nav__link">
+        第十节 "Shallow Dive" MySQL 索引性能分析概要
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/5DB_locc_mvcc/" class="md-nav__link">
+        第十一节 浅谈数据库并发控制 - 锁和 MVCC
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql5_btree/" class="md-nav__link">
+        第十二节 "Shallow Dive" MySQL 为何使用 B+ 树而非哈希或者B树
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap1/mysql_bia_review/" class="md-nav__link">
+        MySQL 基础知识复习
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          MySQL 实战篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 实战篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/1table_design/" class="md-nav__link">
+        L1 表结构设计篇 - 数据类型
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/2table_design/" class="md-nav__link">
+        L2 表结构设计篇 - 表设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/3table_index/" class="md-nav__link">
+        L3 索引优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/4table_query/" class="md-nav__link">
+        L4 查询优化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/5db_perf_replica/" class="md-nav__link">
+        L5 高可用架构 - MySQL 复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/6db_ha/" class="md-nav__link">
+        L6 MySQL高可用架构
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/7Dist_db/" class="md-nav__link">
+        L7 分布式架构篇
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/9Mysql_copy/" class="md-nav__link">
+        L8 MySQL的零拷贝技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap2_opt/8opt_int/" class="md-nav__link">
+        L8 Operation Interview
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          AWS Aurora 技术与实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          AWS Aurora 技术与实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../1Intital_Explore/" class="md-nav__link">
+        第一节 深入了解 Aurora 数据库
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../2Aurora_Adv/" class="md-nav__link">
+        第二节 揭秘 Aurora 底层存储
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          第三节 Aurora Basic Operation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        第三节 Aurora Basic Operation
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1create-database" class="md-nav__link">
+    1、Create Database
+  </a>
+  
+    <nav class="md-nav" aria-label="1、Create Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-1-introduction" class="md-nav__link">
+    1-1 Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-2-create-amazon-aurora-database-cluster" class="md-nav__link">
+    1-2 Create Amazon Aurora Database Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-3-check-amazon-aurora-cluster" class="md-nav__link">
+    1-3 Check AMAZON AURORA Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-4-use-mysql-workbench-connect-amazon-aurora-cluster" class="md-nav__link">
+    1-4 Use Mysql workbench connect amazon AURORA Cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-scalability-and-high-availability" class="md-nav__link">
+    2 Scalability and High Availability
+  </a>
+  
+    <nav class="md-nav" aria-label="2 Scalability and High Availability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2-1-verticalinstance-scaling" class="md-nav__link">
+    2-1 Vertical(Instance) Scaling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-2-horizontal-scaling-read-scaling" class="md-nav__link">
+    2-2 Horizontal scaling (Read scaling)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-3-failover" class="md-nav__link">
+    2-3 failover
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-4-cloning-an-aurora-db-cluster" class="md-nav__link">
+    2-4 Cloning an Aurora DB cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-5-backtracking-an-aurora-db-cluster" class="md-nav__link">
+    2-5 Backtracking an Aurora DB cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-backup-and-restoration" class="md-nav__link">
+    3 Backup and Restoration
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Backup and Restoration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-1-backup" class="md-nav__link">
+    3-1 Backup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-2-restoring-data" class="md-nav__link">
+    3-2 Restoring data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3-creating-a-db-cluster-snapshot" class="md-nav__link">
+    3-3 Creating a DB cluster snapshot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-4-restoring-from-a-db-cluster-snapshot" class="md-nav__link">
+    3-4 Restoring from a DB cluster snapshot
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4monitoring-on-aurora-db-cluster" class="md-nav__link">
+    4、Monitoring on Aurora DB Cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="4、Monitoring on Aurora DB Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-amazon-cloudwatch-metrics" class="md-nav__link">
+    4-1 Amazon CloudWatch Metrics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-enhanced-monitoring" class="md-nav__link">
+    4-2 Enhanced Monitoring
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-3-enhanced-monitoring" class="md-nav__link">
+    4-3 Enhanced Monitoring
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5managing-an-amazon-aurora-db-cluster" class="md-nav__link">
+    5、Managing an Amazon Aurora DB cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="5、Managing an Amazon Aurora DB cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5-1-working-with-db-parameter-groups-and-db-cluster-parameter-groups" class="md-nav__link">
+    5-1 Working with DB parameter groups and DB cluster parameter groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-2-using-aurora-auto-scaling-with-aurora-replicas" class="md-nav__link">
+    5-2 Using Aurora Auto Scaling with Aurora replicas
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-3-rebooting-a-db-instance-in-a-db-cluster" class="md-nav__link">
+    5-3 Rebooting a DB instance in a DB cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-4-stopping-db-cluster" class="md-nav__link">
+    5-4 Stopping DB cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-5-starting-db-cluster" class="md-nav__link">
+    5-5 Starting DB cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          MySQL on K8S
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL on K8S
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/1Mysql_k8s/" class="md-nav__link">
+        第一节 Kubernetes 部署 MySQL 主从服务
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../chap_k8s/2mysql_Master_slave/" class="md-nav__link">
+        第二节 在K8s中部署主从结构的MySQL服务
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+          MySQL 基础操作篇
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_6">
+          <span class="md-nav__icon md-icon"></span>
+          MySQL 基础操作篇
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/1db_intro/" class="md-nav__link">
+        第一节 数据库简介、及常用数据库介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/2db_install/" class="md-nav__link">
+        第二节 安装 MySQL Repository & Jam db install
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/3db_sql/" class="md-nav__link">
+        第三节 结构化查询语言 SQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/4db_sql_ops1/" class="md-nav__link">
+        第四节 MySQL 操作实例(上)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/5db_sql_ops2/" class="md-nav__link">
+        第五节 MySQL 操作实例(中)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/6db_sql_ops3/" class="md-nav__link">
+        第六节 Mysql操作实例(下)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/7db_type/" class="md-nav__link">
+        第七节 MySQL 数据类型约束
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/8db_index/" class="md-nav__link">
+        第八节 MySQL 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/9db_mgt/" class="md-nav__link">
+        第九节 MySQL 的用户管理和权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/10db_logs/" class="md-nav__link">
+        第十节 MySQL 日志管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/11db_backup/" class="md-nav__link">
+        第十一节 MySQL备份概述
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/13db_xtrabackup/" class="md-nav__link">
+        第十二节 MySQL逻辑备份mysqldump
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/14mysql_replicate/" class="md-nav__link">
+        第十四节 MySQL 主从复制原理介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/15mysql_master_slave/" class="md-nav__link">
+        第十五节 MySQL 传统主从同步配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/16mysq_gtid/" class="md-nav__link">
+        第十六节 MySQL 基于 GTID 的主从复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/17ops_review/" class="md-nav__link">
+        Mysql OPS Review
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../db_ops/18review_short/" class="md-nav__link">
+        SQL操作精简版
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+          MongoDB 操作实战教程
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_7">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 操作实战教程
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/1mongodb_intro/" class="md-nav__link">
+        1 MongoDB介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/2mongodb_install/" class="md-nav__link">
+        2 MongoDB 快速安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/3mongodb_k8s_cluster/" class="md-nav__link">
+        3 在 Kubernetes 上编排 MongoDB 集群
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/4mongodb_opt/" class="md-nav__link">
+        4 MongoDB文档操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/5mongodb_springbboot/" class="md-nav__link">
+        5 MongoDB整合SpringBoot
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/6mongodb_pip/" class="md-nav__link">
+        6 MongoDB 聚合操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/7mongodb_pip2/" class="md-nav__link">
+        7 MongoDB聚合操作高级操作
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/8mongodb_view/" class="md-nav__link">
+        8 MongoDB视图
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/9mongodb_index/" class="md-nav__link">
+        9 MongoDB索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/10mongodb_index_adv/" class="md-nav__link">
+        10 索引属性
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo1/11mongodb_explain/" class="md-nav__link">
+        11 explain执行计划详解
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          MongoDB 高级实战教程(全)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          MongoDB 高级实战教程(全)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/1mon_intro_install/" class="md-nav__link">
+        1 认识文档数据库 MongoDB & 及数据安装
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/2mon_command/" class="md-nav__link">
+        2 MongoDB 基本操作及聚合操作实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/3mon_rep/" class="md-nav__link">
+        3 复制集机制及原理 & 实现
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/4mon_tools/" class="md-nav__link">
+        4 MongoDB 全家桶
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/5mon_design/" class="md-nav__link">
+        5 Mongo 模型设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/6mon_red_write/" class="md-nav__link">
+        6 MongoDB 事务开发
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/7mon_changestream_bestdesign/" class="md-nav__link">
+        7 MongoDB Change Stream & 开发最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/8mon_shard/" class="md-nav__link">
+        8 Mongo Shards分片技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/9mon_monitor/" class="md-nav__link">
+        9 MongoDB 监控最佳实践
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/10mon_bakup_restore/" class="md-nav__link">
+        10 MongoDB 备份与恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/11mon_sec/" class="md-nav__link">
+        11 MongoDB 安全设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/12mon_index/" class="md-nav__link">
+        12 MongoDB 索引
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/13mon_perf/" class="md-nav__link">
+        13 MongoDB 性能
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/14mon_cluster/" class="md-nav__link">
+        14 高级集群设计
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/15mon_goonline/" class="md-nav__link">
+        15 MongoDB上线及升级
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/16mon_sample/" class="md-nav__link">
+        16 MongoDB 应用实例和场景
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/17mon_dms/" class="md-nav__link">
+        17 数据迁移
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/18mon_spark/" class="md-nav__link">
+        18 MongoDB + Spark实战
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/19mon_sql/" class="md-nav__link">
+        19 MongoDB SQL 套接件
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../mongo2/20MongoDB_mico_middle_service/" class="md-nav__link">
+        20 MongoDB 与微服务 & 数据中台
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          PostgresSQL 12.6运维入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          PostgresSQL 12.6运维入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/2pg_intall/" class="md-nav__link">
+        1 PostgreSQL介绍&安装&链接管理&用户权限管理
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/3pg_cmd/" class="md-nav__link">
+        2 常用基础命令介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_logs/" class="md-nav__link">
+        3 Online WAL[Write Head Log]日志（redo)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/4pg_stru/" class="md-nav__link">
+        4 体系结构介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/5pg_bak/" class="md-nav__link">
+        5 备份恢复恢复
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/6pg_repl/" class="md-nav__link">
+        6 Master-Slave流复制
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/7pg_ops/" class="md-nav__link">
+        7 有用的系统函数
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pg1/1pg_int/" class="md-nav__link">
+        PostgreSQL Interview Questions 2022
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="0">
+          AWS DB OTHERs
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_10">
+          <span class="md-nav__icon md-icon"></span>
+          AWS DB OTHERs
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/1aws_neptune/" class="md-nav__link">
+        L1 深入了解 Amazon Neptune 图数据库技术
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../aws/2dydb1/" class="md-nav__link">
+        L2 分布式键值存储 Dynamo 的实现原理
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_11" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_11" id="__nav_11_label" tabindex="0">
+          Extra 知识扩展
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_11_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_11">
+          <span class="md-nav__icon md-icon"></span>
+          Extra 知识扩展
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../extra/mkdoc_gitbook/" class="md-nav__link">
+        GitHub+Travis+Mkdocs自动化构建文档库(DataBase)
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="目录">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      目录
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1create-database" class="md-nav__link">
+    1、Create Database
+  </a>
+  
+    <nav class="md-nav" aria-label="1、Create Database">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-1-introduction" class="md-nav__link">
+    1-1 Introduction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-2-create-amazon-aurora-database-cluster" class="md-nav__link">
+    1-2 Create Amazon Aurora Database Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-3-check-amazon-aurora-cluster" class="md-nav__link">
+    1-3 Check AMAZON AURORA Cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-4-use-mysql-workbench-connect-amazon-aurora-cluster" class="md-nav__link">
+    1-4 Use Mysql workbench connect amazon AURORA Cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-scalability-and-high-availability" class="md-nav__link">
+    2 Scalability and High Availability
+  </a>
+  
+    <nav class="md-nav" aria-label="2 Scalability and High Availability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#2-1-verticalinstance-scaling" class="md-nav__link">
+    2-1 Vertical(Instance) Scaling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-2-horizontal-scaling-read-scaling" class="md-nav__link">
+    2-2 Horizontal scaling (Read scaling)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-3-failover" class="md-nav__link">
+    2-3 failover
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-4-cloning-an-aurora-db-cluster" class="md-nav__link">
+    2-4 Cloning an Aurora DB cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-5-backtracking-an-aurora-db-cluster" class="md-nav__link">
+    2-5 Backtracking an Aurora DB cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-backup-and-restoration" class="md-nav__link">
+    3 Backup and Restoration
+  </a>
+  
+    <nav class="md-nav" aria-label="3 Backup and Restoration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-1-backup" class="md-nav__link">
+    3-1 Backup
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-2-restoring-data" class="md-nav__link">
+    3-2 Restoring data
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-3-creating-a-db-cluster-snapshot" class="md-nav__link">
+    3-3 Creating a DB cluster snapshot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-4-restoring-from-a-db-cluster-snapshot" class="md-nav__link">
+    3-4 Restoring from a DB cluster snapshot
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4monitoring-on-aurora-db-cluster" class="md-nav__link">
+    4、Monitoring on Aurora DB Cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="4、Monitoring on Aurora DB Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#4-1-amazon-cloudwatch-metrics" class="md-nav__link">
+    4-1 Amazon CloudWatch Metrics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-2-enhanced-monitoring" class="md-nav__link">
+    4-2 Enhanced Monitoring
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-3-enhanced-monitoring" class="md-nav__link">
+    4-3 Enhanced Monitoring
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5managing-an-amazon-aurora-db-cluster" class="md-nav__link">
+    5、Managing an Amazon Aurora DB cluster
+  </a>
+  
+    <nav class="md-nav" aria-label="5、Managing an Amazon Aurora DB cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#5-1-working-with-db-parameter-groups-and-db-cluster-parameter-groups" class="md-nav__link">
+    5-1 Working with DB parameter groups and DB cluster parameter groups
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-2-using-aurora-auto-scaling-with-aurora-replicas" class="md-nav__link">
+    5-2 Using Aurora Auto Scaling with Aurora replicas
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-3-rebooting-a-db-instance-in-a-db-cluster" class="md-nav__link">
+    5-3 Rebooting a DB instance in a DB cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-4-stopping-db-cluster" class="md-nav__link">
+    5-4 Stopping DB cluster
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-5-starting-db-cluster" class="md-nav__link">
+    5-5 Starting DB cluster
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="aurora-basic-operation"><strong>第三节 Aurora Basic Operation</strong></h1>
+<h2 id="1create-database"><strong>1、Create Database</strong></h2>
+<h3 id="1-1-introduction"><strong>1-1 Introduction</strong></h3>
+<p>From this operartion guide, I will show simple and clear way to manage <strong>AWS Aurora cluster for MySQL</strong> from <strong>AWS console</strong>. Through this guide, you will learn:</p>
+<ul>
+<li>Create Amazon Aurora Cluster </li>
+<li>Operation and management on Amazon Aurora Cluster<ul>
+<li>Scalability</li>
+<li>Operation on Read replica </li>
+<li>Failover</li>
+<li>Database backtrack</li>
+</ul>
+</li>
+<li>Database backup and restoration</li>
+<li>Management and Monitoring on Database with Cloudwatch and Performance Insights</li>
+</ul>
+<h3 id="1-2-create-amazon-aurora-database-cluster"><strong>1-2 Create Amazon Aurora Database Cluster</strong></h3>
+<p>This part will introduce how to create a MySQL based DataBase cluster, which includes one master db instance and cross three availability zones</p>
+<p><strong>prerequisites:</strong></p>
+<ul>
+<li>Possess one IAM user with proper access right,your AWS account must have IAM policies that grant the permissions required to perform Amazon RDS operations. (With right which can assign IAM roles)</li>
+</ul>
+<blockquote>
+<p>Currently our JAM DevOps IAM user which login from SSO link don't have full IAM rights (can't assign IAM roles) which will failed in creation on Aurora Cluster in assigning IAM rols to Cloudwatch to monitor the Aurora Cluster</p>
+</blockquote>
+<ul>
+<li>Default VPC, subnet or create brand new VPC and subnet for RDS Aurora</li>
+</ul>
+<p><strong>Creating Aurora Mysql Database cluster</strong></p>
+<ul>
+<li>.Sign in to the AWS Management Console and open the Amazon RDS console at https://console.aws.amazon.com/rds/</li>
+<li>In the upper-right corner of the AWS Management Console, choose the AWS Region in which you want to create the DB cluster. (Exp: <strong>EU(Ireland)</strong>) Aurora is not available in all AWS Regions. For a list of AWS Regions where Aurora is available, see <a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Concepts.RegionsAndAvailabilityZones.html#Aurora.Overview.Availability">Region availability</a>.</li>
+<li>In the navigation pane, choose <strong>Databases</strong>.</li>
+<li>Choose <strong>Create database</strong>.</li>
+<li><strong>In Choose a database creation method</strong>, choose <strong>Standard Create</strong>.</li>
+<li>In <strong>Engine options</strong>, choose <strong>Amazon Aurora.</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_1.png" title="Body image" /></p>
+<ul>
+<li>In <strong>Edition</strong>, choose <strong>Amazon Aurora with MySQL compatibility</strong></li>
+<li>If you chose Amazon Aurora with MySQL compatibility, choose <strong>Capacity type: Provisioned(You provision and manage the server instance sizes.)</strong></li>
+<li>Choose <strong>Single-master</strong> as <strong>Replication features</strong></li>
+<li>Choose Version: <strong>Aurora MySQL5.7</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_2.png" title="Body image" /></p>
+<ul>
+<li><strong>Settings</strong>：<ul>
+<li>DB cluster identifier： <strong>jamauroracluster</strong></li>
+<li>Credentials Settings：<ul>
+<li>Master username: <strong>admin</strong>,   (A login ID for the master user of your DB instance)</li>
+<li>Master password and Confirm password: (At least 8 printable ASCII characters. Can't contain any of the following: / (slash), '(single quote), "(double quote) and @ (at sign).)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>DB instance size</strong><ul>
+<li>DB instance class: <strong>Memory Optimized classes (includes r classes)</strong><ul>
+<li><strong>db.r5.large</strong> (2vCPUs and 16GB RAM) (for JAM internal test only)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Availability &amp; durability: <ul>
+<li>Multi-AZ deployment：<strong>Create an Aurora Replica or Reader node in a different AZ (recommended for scaled availability)</strong></li>
+</ul>
+</li>
+<li><strong>Connectivity:</strong><ul>
+<li>VPC: <strong>create new one</strong> or choose exist one <strong>vpc-025202ed238785f92</strong></li>
+<li>Subnet group: <strong>default</strong></li>
+<li>Public access: <strong>YES</strong> (Attention: This is only for test/demo purpose, set <strong>No</strong> for other circumstance)</li>
+<li>VPC security group: <ul>
+<li>Choose existing:<ul>
+<li>default</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Database port</strong>: 3306 (TCP/IP port that the database will use for application connections.)</li>
+</ul>
+</li>
+<li>Database authentication: <strong>Password authentication</strong></li>
+<li><strong>Additional configuration</strong><ul>
+<li>Initial database name: <strong>dbtest</strong> (for test only and If you do not specify a database name, Amazon RDS does not create a database. You can create a DB with SQL: CREATE DATABASE) </li>
+<li>DB cluster parameter group: <strong>default</strong> (We will create an additional one for JAM database)</li>
+<li>Failover priority: <strong>No preference</strong></li>
+<li><strong>Backup</strong>:<ul>
+<li>Backup retention period:<ul>
+<li>1 day (Number of days that RDS should retain automatic backups for this instance.)</li>
+<li>The backup retention period determines the period for which you can perform a point-in-time recovery</li>
+<li>Aurora offers 1-day backup retention for free!</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Encryption：</strong><ul>
+<li><strong>Enable encryption： checked</strong></li>
+<li>Master key: default</li>
+</ul>
+</li>
+<li><strong>Backtrack</strong>: <strong>Backtrack lets you quickly recover from a user error</strong>. <ul>
+<li><strong>Enabled: check</strong>   </li>
+<li><strong>Target Backtrack window</strong>: (The Backtrack window determines how far back in time you could go. Aurora will try to retain enough log information to support that window of time.): <strong>1h</strong><ul>
+<li>Typical user cost:   <strong>db.r5.large $ 1.20 USD / month 1h</strong></li>
+<li><strong>db.r5.large $ 86.28 USD / month 72h</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Performance Insights: <strong>enable</strong><ul>
+<li>Retention period: <strong>7days</strong>  (Retention determines the size of the rolling window of data history that Performance Insights stores and makes available)</li>
+</ul>
+</li>
+<li>Monitoring: <ul>
+<li><strong>Enable Enhanced monitoring</strong></li>
+<li>Granularity: 60s</li>
+<li>Monitoring Role: <strong>default</strong><ul>
+<li><strong>Clicking "Create database" will authorize RDS to create the IAM role rds-monitoring-role</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Log exports</strong>: (publish to Amazon CloudWatch Logs)<ul>
+<li>Audit log</li>
+<li>Error log</li>
+<li>Slow query log</li>
+</ul>
+</li>
+<li>Maintenance:<ul>
+<li><strong>Maintenance window</strong>: No preference (Select the period you want pending modifications or maintenance applied to the database by Amazon RDS.)</li>
+</ul>
+</li>
+<li><strong>Deletion protection</strong>:<ul>
+<li><strong>Enable deletion protection</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Click Create database</p>
+<h3 id="1-3-check-amazon-aurora-cluster"><strong>1-3 Check AMAZON AURORA Cluster</strong></h3>
+<ul>
+<li>Back to console, chose <strong>Databases: jamauroracluster</strong>, you will find two db instances is <strong>creating</strong>, after couple minutes, the master instance "<strong>jamauroracluster-instance-1</strong>"  will be changed to <strong>"available"</strong>,  then the replica instance will changed to <strong>"available"</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_3.png" title="Body image" /></p>
+<p>Click <strong>cluster identifier: jamauroracluster</strong>, you will see the cluster configuration and settings</p>
+<ul>
+<li>Check <strong>connectivity &amp; security</strong>, you will see the cluster endpoint, one for <strong>writer endpoint</strong> and another one for <strong>reader endpoint</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_4.png" title="Body image" /></p>
+<ul>
+<li>Check <strong>monitoring</strong>, you will see the <strong>Cloudwatch</strong> monitor the cluster and show stats of <strong>metrics</strong> for all instances</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_5.png" title="Body image" /></p>
+<ul>
+<li>
+<p>check <strong>Detail</strong>, which include instance settings, Networking &amp; secruity, Instance class, Availability, Auto scaling policies &amp; Auto scaling activities, Maintenance, Backup, Backtrack, Snapshots, events, and Logs</p>
+</li>
+<li>
+<p><strong>Cluster configuration: jamauroracluster</strong></p>
+</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_6.png" title="Body image" /></p>
+<ul>
+<li><strong>Instance(Writer) configuration: <code>jamauroracluster-instance-1</code></strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_7.png" title="Body image" /></p>
+<h3 id="1-4-use-mysql-workbench-connect-amazon-aurora-cluster"><strong>1-4 Use Mysql workbench connect amazon AURORA Cluster</strong></h3>
+<p>Since we already get <strong>cluster writer endpoint</strong> and the <strong>writer instance Public accessibility already set Yes</strong> , we can connect aurora cluster with <strong>Mysql workbench</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_8.png" title="Body image" /></p>
+<pre><code>SHOW VARIABLES LIKE &quot;%version%&quot;;
++-------------------------+------------------------------+
+| Variable_name           | Value                        |
++-------------------------+------------------------------+
+| innodb_version          | 5.7.30                       |
+| protocol_version        | 10                           |
+| slave_type_conversions  |                              |
+| tls_version             | TLSv1,TLSv1.1,TLSv1.2        |
+| version                 | 5.7.30-log                   |
+| version_comment         | MySQL Community Server (GPL) |
+| version_compile_machine | x86_64                       |
+| version_compile_os      | Linux                        |
++-------------------------+------------------------------+
+8 rows in set (0.00 sec)
+
+show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| dbtest             |
+| mysql              |
+| performance_schema |
+| sys                |
++--------------------+
+5 rows in set (0.68 sec)
+
+use dbtest;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+
+
+create table ct_test(name text,age int);
+insert into ct_test values ('cubetree','10');
+insert into ct_test values ('David','40');
+
+mysql&gt; select * from ct_test;
++----------+------+
+| name     | age  |
++----------+------+
+| cubetree |   10 |
+| David    |   40 |
++----------+------+
+2 rows in set (0.21 sec)
+</code></pre>
+<h2 id="2-scalability-and-high-availability"><strong>2 Scalability and High Availability</strong></h2>
+<h3 id="2-1-verticalinstance-scaling"><strong>2-1 Vertical(Instance) Scaling</strong></h3>
+<p>You can scale your Aurora DB cluster as needed by modifying the DB instance class for each DB instance in the DB cluster. </p>
+<p>Aurora supports several DB instance classes optimized for Aurora, depending on database engine compatibility.</p>
+<p>You can scale your Aurora MySQL DB cluster by modifying the DB instance class for each DB instance in the DB cluster. Aurora MySQL supports several DB instance classes optimized for Aurora. <strong>Don't use db.t2 or db.t3 instance classes for larger Aurora clusters of size greater than 40 TB.</strong></p>
+<p>In the following table, you can find details about supported Amazon Aurora DB instance classes for the Aurora DB engines compatible with MySQL.</p>
+<p><img alt="Alt Image Text" src="../../images/aua3_9.png" title="Body image" /></p>
+<p>The maximum number of connections allowed to an Aurora MySQL DB instance is determined by the <code>max_connections</code> parameter in the instance-level parameter group for the DB instance.</p>
+<p>If you create a new parameter group to customize your own default for the connection limit, you'll see that the default connection limit is derived using a formula based on the <strong>DBInstanceClassMemory</strong> value</p>
+<pre><code>GREATEST({log(DBInstanceClassMemory/805306368)*45},{log(DBInstanceClassMemory/8187281408)*1000})
+</code></pre>
+<p>As shown in the preceding table, the formula produces connection limits that increase by 1000 as the memory doubles between progressively larger R3, R4, and R5 instances, and by 45 for different memory sizes of T2 and T3 instances.</p>
+<p><span style="color:red">You can increase the maximum number of connections to your Aurora MySQL DB instance by scaling the instance up to a DB instance class with more memory, or by setting a larger value for the <code>max_connections</code> parameter in the DB parameter group for your instance, up to 16,000</span>.</p>
+<p>1.You can modify the aurora instance type direclty, <strong>but the modification will restart db instance, which will cause the suspend for service</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_10.png" title="Body image" /></p>
+<p>2.Chose your correct and suitable instance type</p>
+<p><img alt="Alt Image Text" src="../../images/aua3_11.png" title="Body image" /></p>
+<p>3.Scheduling of modifications, <strong>will cause the pending</strong></p>
+<blockquote>
+<p>Attentions: In productuon environment, recommend add a new read replica, then switch the new read plica, then do the modifcation and delete the old replica, which can help reduce the pending session</p>
+</blockquote>
+<p><img alt="Alt Image Text" src="../../images/aua3_12.png" title="Body image" /></p>
+<h3 id="2-2-horizontal-scaling-read-scaling"><strong>2-2 Horizontal scaling (Read scaling)</strong></h3>
+<p>You can achieve read scaling for your Aurora DB cluster by creating up to <strong>15 Aurora Replicas in a DB cluster that uses single-master replication</strong>. Each Aurora Replica returns the same data from the cluster volume with minimal replica lag—usually considerably less than 100 milliseconds after the primary instance has written an update. As your read traffic increases, you can create additional Aurora Replicas and connect to them directly to distribute the read load for your DB cluster. </p>
+<p><span style="color:red">Aurora Replicas don't have to be of the same DB instance class as the primary instance.</span>.</p>
+<p><strong>1.Add reader replica (add reader or add Create cross region read replica)</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_13.png" title="Body image" /></p>
+<p><strong>2.Chose DB instance class and different region for read replica</strong></p>
+<p><span style="color:red">We recommend that you distribute the primary instance and Aurora Replicas in your DB cluster over multiple Availability Zones to improve the availability of your DB cluster. </span></p>
+<ul>
+<li>db.r5.large (<strong>Can be different from primary db</strong>)</li>
+<li>DB instance identifier:  (<strong>Must be unique</strong>) <ul>
+<li>Exp: <code>jamauroracluster-instance-1-eu-west-1b</code></li>
+<li><strong>Not publicly accessible</strong></li>
+</ul>
+</li>
+<li>Availability Zone: <strong>eu-west-1b</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_14.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_15.png" title="Body image" /></p>
+<ul>
+<li>Enable Enhanced monitoring: <strong>enabled</strong></li>
+</ul>
+<p><strong>3.Failover tier priority selection</strong></p>
+<p>Choose a failover priority for the instance. If you don't select a value, the default is tier-1. This priority determines the order in which Aurora Replicas are promoted when recovering from a primary instance failure. </p>
+<p><img alt="Alt Image Text" src="../../images/aua3_16.png" title="Body image" /></p>
+<p><strong>4.Create Read replciation(Need wait for like almost 5 minutes to be <span style="color:green">Available</span>)</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_17.png" title="Body image" /></p>
+<p><strong>Read Replica SQL Test</strong></p>
+<pre><code>mysql -h read-endpoint -u admin -p
+
+mysql&gt; use dbtest;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql&gt; insert into ct_test values ('kim','30');
+ERROR 1290 (HY000): The MySQL server is running with the --read-only option so it cannot execute this statement
+</code></pre>
+<h3 id="2-3-failover"><strong>2-3 failover</strong></h3>
+<p><strong>1.check cluster status and instance status</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_18.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_19.png" title="Body image" /></p>
+<p><strong>2.Chose primary instance to failover (approximately 30s to finish the failover)</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_20.png" title="Body image" /></p>
+<p><strong>3.Check the failover status</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_21.png" title="Body image" /></p>
+<h3 id="2-4-cloning-an-aurora-db-cluster"><strong>2-4 Cloning an Aurora DB cluster</strong></h3>
+<p>https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Managing.Clone.html</p>
+<p>Aurora cloning uses a <strong>copy-on-write</strong> protocol. With this mechanism, a clone requires only minimal additional space when first created. </p>
+<p>In the beginning, Aurora maintains a single copy of the data, which is used by both the original and new DB clusters. Aurora allocates new storage only when data changes, either on the source cluster or the cloned cluster. You can make multiple clones from the same DB cluster.</p>
+<p><strong>Limitations of Aurora cloning</strong></p>
+<ul>
+<li>You cannot create clones across AWS Regions. Each clone must be created in the same Region as the source cluster.</li>
+<li>Currently, you are limited to 15 clones based on a copy, including clones based on other clones. After that, only copies can be created. However, each copy can also have up to 15 clones.</li>
+<li>Currently, you cannot clone from a cluster without the parallel query feature, to a cluster where parallel query is enabled. To bring data into a cluster that uses parallel query, create a snapshot of the original cluster and restore it to a cluster where the parallel query option is enabled.</li>
+<li>You can't create clones from clusters that have no DB instances. Cloning works only for clusters that have at least one database instance.</li>
+<li>You can provide a different virtual private cloud (VPC) for your clone. However, the subnets in those VPCs must map to the same set of Availability Zones.</li>
+</ul>
+<p><strong>1.Creating an Aurora clone</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_22.png" title="Body image" /></p>
+<p><strong>2.Chose DB instance size and DB instance identifier(unique)</strong></p>
+<ul>
+<li>jamauroracluster-clone1</li>
+<li>DB instance</li>
+<li><span style="color:red">Can also enable backtrack for Clone DB</span></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_23.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_24.png" title="Body image" /></p>
+<p><strong>3.check aurora  clone cluster status(Ready after 5 minustes)</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_25.png" title="Body image" /></p>
+<h3 id="2-5-backtracking-an-aurora-db-cluster"><strong>2-5 Backtracking an Aurora DB cluster</strong></h3>
+<p>With Amazon Aurora with MySQL compatibility, you can backtrack a DB cluster to a specific time, without restoring data from a backup.</p>
+<p>Backtracking "rewinds" the DB cluster to the time you specify. Backtracking is not a replacement for backing up your DB cluster so that you can restore it to a point in time. However, backtracking provides the following advantages over traditional backup and restore:</p>
+<ul>
+<li><strong>You can easily undo mistakes</strong>. If you mistakenly perform a destructive action, such as a <code>DELETE</code> without a <code>WHERE</code> clause, you can backtrack the DB cluster to a time before the destructive action with minimal interruption of service.</li>
+<li><strong>You can backtrack a DB cluster quickly</strong>. Restoring a DB cluster to a point in time launches a new DB cluster and restores it from backup data or a DB cluster snapshot, which can take hours. Backtracking a DB cluster doesn't require a new DB cluster and rewinds the DB cluster in minutes.</li>
+<li><strong>You can explore earlier data changes</strong>. You can repeatedly backtrack a DB cluster back and forth in time to help determine when a particular data change occurred. For example, you can backtrack a DB cluster three hours and then backtrack forward in time one hour. In this case, the backtrack time is two hours before the original time.</li>
+</ul>
+<p><strong>1. Configuring backtracking</strong></p>
+<p>To use the Backtrack feature, you must enable backtracking and specify a target backtrack window. Otherwise, backtracking is disabled.</p>
+<p><img alt="Alt Image Text" src="../../images/aua3_26.png" title="Body image" /></p>
+<p><strong>2.  Specify a Target</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_27.png" title="Body image" /></p>
+<p><strong>3. Check backtrack status</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_28.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_29.png" title="Body image" /></p>
+<h2 id="3-backup-and-restoration"><strong>3 Backup and Restoration</strong></h2>
+<h3 id="3-1-backup"><strong>3-1 Backup</strong></h3>
+<p>Aurora backs up your cluster volume automatically and retains restore data for the length of the backup <strong>retention period</strong>. </p>
+<p>Aurora backups are continuous and incremental so you can quickly restore to any point within the backup retention period. No performance impact or interruption of database service occurs as backup data is being written. </p>
+<p>You can specify a backup retention period, from 1 to 35 days, when you create or modify a DB cluster. Aurora backups are stored in Amazon S3.</p>
+<p><strong>If you want to retain a backup beyond the backup retention period, you can also take a snapshot of the data in your cluster volume</strong>. </p>
+<p>Because Aurora retains incremental restore data for the entire backup retention period, <strong>you only need to create a snapshot for data that you want to retain beyond the backup retention period. You can create a new DB cluster from the snapshot.</strong></p>
+<p>You can recover your data by creating a new Aurora DB cluster from the backup data that Aurora retains, or from a DB cluster snapshot that you have saved. You can quickly restore a new copy of a DB cluster created from backup data to any point in time during your backup retention period. The continuous and incremental nature of Aurora backups during the backup retention period means you don't need to take frequent snapshots of your data to improve restore times.</p>
+<h3 id="3-2-restoring-data"><strong>3-2 Restoring data</strong></h3>
+<p>To determine the latest or earliest restorable time for a DB instance, look for the <code>Latest Restorable Time</code> or <code>Earliest Restorable Time</code> values on the RDS console.</p>
+<ul>
+<li>The <strong>latest restorable time</strong> for a DB cluster is the most recent point at which you can restore your DB cluster, typically within <strong>5 minutes of the current time</strong>.</li>
+<li>The <strong>earliest restorable time</strong> specifies how far back within the backup retention period that you can restore your cluster volume.</li>
+</ul>
+<p>You can determine when the restore of a DB cluster is complete by checking the <code>Latest Restorable Time</code>and<code>Earliest Restorable Time</code> values. </p>
+<p>The <code>Latest Restorable Time</code> and <code>Earliest Restorable Time</code> values return NULL until the restore operation is complete. You can't request a backup or restore operation if <code>Latest Restorable Time</code> or <code>Earliest Restorable Time</code> returns <code>NULL</code>.</p>
+<p><strong>1.Restoring a DB cluster to a specified time</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_30.png" title="Body image" /></p>
+<ul>
+<li><code>jamauroracluster-restoredb</code></li>
+<li>Latest restorable time</li>
+<li>Availability Zone: <code>eu-west-1a</code></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_31.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_32.png" title="Body image" /></p>
+<p><strong>2.Launch DB instance</strong></p>
+<p><strong>A new cluster will be created in with <code>DB cluster identifier-cluster</code></strong>, exp, <strong><code>jamauroracluster-restoredb-cluster</code></strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_33.png" title="Body image" /></p>
+<h3 id="3-3-creating-a-db-cluster-snapshot"><strong>3-3 Creating a DB cluster snapshot</strong></h3>
+<p>Amazon RDS creates a storage volume snapshot of your DB cluster, backing up the entire DB cluster and not just individual databases. When you create a DB cluster snapshot, you need to identify which DB cluster you are going to back up, and then give your DB cluster snapshot a name so you can restore from it later. </p>
+<p><strong>The amount of time it takes to create a DB cluster snapshot varies with the size your databases</strong>. Since the snapshot includes the entire storage volume, the size of files, such as temporary files, also affects the amount of time it takes to create the snapshot.</p>
+<p><strong><span style="color:red">Unlike automated backups, manual snapshots aren't subject to the backup retention period. Snapshots don't expire.</span></strong></p>
+<p><strong>For very long-term backups, we recommend exporting snapshot data to Amazon S3. If the major version of your DB engine is no longer supported, you can't restore to that version from a snapshot</strong></p>
+<p><strong>1. Create snapshot</strong></p>
+<ul>
+<li>In the list of DB instances, <strong><span style="color:red">choose a writer instance for the DB cluster</span></strong>.</li>
+<li>Choose Actions, and then choose Take snapshot.</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_34.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_35.png" title="Body image" /></p>
+<h3 id="3-4-restoring-from-a-db-cluster-snapshot"><strong>3-4 Restoring from a DB cluster snapshot</strong></h3>
+<p>Amazon RDS creates a storage volume snapshot of your DB cluster, backing up the entire DB instance and not just individual databases. You can create a DB cluster by restoring from this DB cluster snapshot. </p>
+<p>When you restore the DB cluster, you provide the name of the DB cluster snapshot to restore from, and <strong>then provide a name for the new DB cluster that is created from the restore</strong>. </p>
+<p><strong>You can't restore from a DB cluster snapshot to an existing DB cluster; a new DB cluster is created when you restore.</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_36.png" title="Body image" /></p>
+<p><strong>Parameter group considerations</strong></p>
+<p>We recommend that you retain the parameter group for any DB cluster snapshots you create, so that you can associate your restored DB cluster with the correct parameter group. You can specify the parameter group when you restore the DB cluster.</p>
+<p><strong>Security group considerations</strong></p>
+<p>When you restore a DB cluster, the default security group is associated with the restored cluster by default.</p>
+<h2 id="4monitoring-on-aurora-db-cluster"><strong>4、Monitoring on Aurora DB Cluster</strong></h2>
+<p><a href="https://jam4.sapjam.com/wiki/show/UpFy5ZLJGG1Jr9FgUXxCJo">Handbook for Database monitoring, alarm and log collection on AWS RDS</a></p>
+<h3 id="4-1-amazon-cloudwatch-metrics"><strong>4-1 Amazon CloudWatch Metrics</strong></h3>
+<p>To monitor the health and performance of your Aurora DB cluster, you can view some, but not all, of the metrics provided by Amazon Aurora in the Amazon RDS console.</p>
+<p>Cloudwatch – Shows a summary of CloudWatch metrics. Each metric includes a graph showing the metric monitored over a specific time span</p>
+<p><a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Monitoring.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.Monitoring.html</a></p>
+<ul>
+<li><strong>Cluster-level metrics for Amazon Aurora</strong></li>
+<li><strong>Instance-level metrics for Amazon Aurora</strong></li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_37.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_38.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_39.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_40.png" title="Body image" /></p>
+<h3 id="4-2-enhanced-monitoring"><strong>4-2 Enhanced Monitoring</strong></h3>
+<p>Amazon RDS provides metrics in real time for the operating system (OS) that your DB instance runs on. You can view the metrics for your DB instance using the console. </p>
+<p>Also, you can consume the Enhanced Monitoring JSON output from Amazon CloudWatch Logs in a monitoring system of your choice.</p>
+<p>By default, Enhanced Monitoring metrics are stored for 30 days in the CloudWatch Logs, which are different from typical CloudWatch metrics. To modify the amount of time the metrics are stored in the CloudWatch Logs, change the retention for the <code>RDSOSMetrics</code> log group in the CloudWatch console. </p>
+<ol>
+<li>Enable or disable Enhanced Monitoring </li>
+<li>Set the Monitoring Role property to the IAM role that you created to permit Amazon RDS to communicate with Amazon CloudWatch Logs for you, or choose <strong>Default</strong> to have RDS create a role for you named <strong><code>rds-monitoring-role</code></strong></li>
+<li>Set the <strong>Granularity</strong> property to the interval, in seconds, between points when metrics are collected for your DB instance or read replica. The <strong>Granularity</strong> property can be set to one of the following values: <strong>1, 5, 10, 15, 30, or 60</strong>.</li>
+</ol>
+<p><img alt="Alt Image Text" src="../../images/aua3_41.png" title="Body image" /></p>
+<p><strong>Viewing Enhanced Monitoring</strong></p>
+<p>You can view OS metrics reported by Enhanced Monitoring in the RDS console by choosing <strong>Enhanced monitoring for Monitoring</strong>.</p>
+<p><img alt="Alt Image Text" src="../../images/aua3_42.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_43.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_44.png" title="Body image" /></p>
+<p><strong>View OS process Monitoring</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_45.png" title="Body image" /></p>
+<ul>
+<li><strong>RDS child processes</strong> – Shows a summary of the RDS processes that support the DB instance, for example aurora for Amazon Aurora DB clusters.</li>
+<li><strong>RDS processes</strong> – Shows a summary of the resources used by the RDS management agent, diagnostics monitoring processes, and other AWS processes that are required to support RDS DB instances.</li>
+<li><strong>OS processes</strong> – Shows a summary of the kernel and system processes, which generally have minimal impact on performance.</li>
+</ul>
+<h3 id="4-3-enhanced-monitoring"><strong>4-3 Enhanced Monitoring</strong></h3>
+<p>Performance Insights expands on existing Amazon RDS monitoring features to illustrate your database's performance and help you analyze any issues that affect it. With the Performance Insights dashboard, you can visualize the database load and filter the load by waits, SQL statements, hosts, or users.</p>
+<p><a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_PerfInsights.Overview.html</a></p>
+<p><strong>DB load</strong></p>
+<p>The central metric for Performance Insights is <code>DB Load</code>. The <code>DB Load</code> metric is collected every second.</p>
+<ul>
+<li>Active Sessions</li>
+<li>Dimensions</li>
+<li>Wait events</li>
+<li>Top SQL</li>
+</ul>
+<p>Performance Insights is an advanced database performance monitoring feature that makes it easy to diagnose and solve performance challenges on Amazon RDS databases. It offers a free tier with 7 days of rolling data retention, and a paid long-term data retention option.</p>
+<p><strong>1. Enabling and disabling Performance Insights</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_46.png" title="Body image" /></p>
+<p><strong>2. Enabling and disabling Performance Insights</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_47.png" title="Body image" /></p>
+<h2 id="5managing-an-amazon-aurora-db-cluster"><strong>5、Managing an Amazon Aurora DB cluster</strong></h2>
+<h3 id="5-1-working-with-db-parameter-groups-and-db-cluster-parameter-groups"><strong>5-1 Working with DB parameter groups and DB cluster parameter groups</strong></h3>
+<ul>
+<li><a href="https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html">https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/USER_WorkingWithParamGroups.html</a></li>
+<li><a href="https://jam4.sapjam.com/wiki/show/K4B9HSSSpncevTHN9rNtku"><strong>The RDS MySql DB Parameters need to be optimized for JAM702</strong></a></li>
+</ul>
+<p><strong>A DB parameter group</strong></p>
+<p>A DB parameter group acts as a container for engine configuration values that are applied to one or more DB instances. DB parameter groups apply to DB instances in both Amazon RDS and Aurora. These configuration settings apply to properties that can vary among the DB instances within an Aurora cluster, such as the sizes for memory buffers.</p>
+<p><strong>A DB cluster parameter group</strong></p>
+<p>A DB cluster parameter group acts as a container for engine configuration values that are applied to every DB instance in an Aurora DB cluster. For example, the Aurora shared storage model requires that every DB instance in an Aurora cluster use the same setting for parameters such as <code>innodb_file_per_table</code>. </p>
+<p>Thus, parameters that affect the physical storage layout are part of the cluster parameter group. The DB cluster parameter group also includes default values for all the instance-level parameters</p>
+<p><img alt="Alt Image Text" src="../../images/aua3_48.png" title="Body image" /></p>
+<p><strong>Create A DB parameter group</strong></p>
+<ul>
+<li><code>jamaurora-db-pg</code></li>
+<li>Description: Test parameter group for jamaurora db</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_49.png" title="Body image" /></p>
+<p><strong>Create A DB cluster parameter group</strong></p>
+<ul>
+<li><code>jamaurora-cluster-pg</code></li>
+<li>Description: Test parameter group for jamaurora cluster</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_50.png" title="Body image" /></p>
+<h3 id="5-2-using-aurora-auto-scaling-with-aurora-replicas"><strong>5-2 Using Aurora Auto Scaling with Aurora replicas</strong></h3>
+<p>To meet your connectivity and workload requirements, Aurora Auto Scaling dynamically adjusts the number of Aurora Replicas provisioned for an Aurora DB cluster using single-master replication. Aurora Auto Scaling is available for both Aurora MySQL and Aurora PostgreSQL. </p>
+<p>Aurora Auto Scaling enables your Aurora DB cluster to handle sudden increases in connectivity or workload. When the connectivity or workload decreases, <strong>Aurora Auto Scaling removes unnecessary Aurora Replicas so that you don't pay for unused provisioned DB instances.</strong></p>
+<p>You define and apply a scaling policy to an Aurora DB cluster. The <em>scaling policy</em> defines the minimum and maximum number of Aurora Replicas that Aurora Auto Scaling can manage. </p>
+<p>Based on the policy, Aurora Auto Scaling adjusts the number of Aurora Replicas up or down in response to actual workloads, determined by using Amazon CloudWatch metrics and target values.</p>
+<p><strong>Aurora Auto Scaling policies</strong></p>
+<p>Aurora Auto Scaling uses a scaling policy to adjust the number of Aurora Replicas in an Aurora DB cluster. Aurora Auto Scaling has the following components:</p>
+<ul>
+<li>A service-linked role</li>
+<li>A target metric</li>
+<li>Minimum and maximum capacity</li>
+<li>A cooldown period</li>
+</ul>
+<p><strong>Adding a scaling policy</strong></p>
+<ul>
+<li><strong>Average CPU utilization of Aurora Replicas</strong> to create a policy based on the average CPU utilization.</li>
+<li><strong>Average connections of Aurora Replicas</strong> to create a policy based on the average number of connections to Aurora Replicas.</li>
+</ul>
+<p><img alt="Alt Image Text" src="../../images/aua3_51.png" title="Body image" /></p>
+<p><strong>Policy details</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_52.png" title="Body image" /></p>
+<p><strong>Add Cluster capacity details</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_53.png" title="Body image" /></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_54.png" title="Body image" /></p>
+<h3 id="5-3-rebooting-a-db-instance-in-a-db-cluster"><strong>5-3 Rebooting a DB instance in a DB cluster</strong></h3>
+<p><span style="color:red">The time required to reboot your DB instance depends on the crash recovery process, database activity at the time of reboot, and the behavior of your specific DB engine. </span></p>
+<p>To improve the reboot time, we recommend that you reduce database activity as much as possible during the reboot process. Reducing database activity reduces rollback activity for in-transit transactions.</p>
+<p><strong>Chose instance to reboot</strong> </p>
+<p><img alt="Alt Image Text" src="../../images/aua3_55.png" title="Body image" /></p>
+<p><strong>reboot the instance</strong></p>
+<p><img alt="Alt Image Text" src="../../images/aua3_56.png" title="Body image" /></p>
+<h3 id="5-4-stopping-db-cluster"><strong>5-4 Stopping DB cluster</strong></h3>
+<p><strong><span style="color:red">While your DB cluster is stopped, you are charged only for cluster storage, manual snapshots, and automated backup storage within your specified retention window. You aren't charged for any DB instance hours. Aurora automatically starts your DB cluster after <code>seven days</code> so that it doesn't fall behind any required maintenance updates.</span></strong></p>
+<p><strong>To minimize charges for a lightly loaded Aurora cluster, you can stop the cluster instead of deleting all of its Aurora Replicas.</strong></p>
+<h3 id="5-5-starting-db-cluster"><strong>5-5 Starting DB cluster</strong></h3>
+<p>You always start an Aurora DB cluster beginning with an Aurora cluster that is already in the stopped state. </p>
+<p>When you start the cluster, all its DB instances become available again. The cluster keeps its configuration settings such as endpoints, parameter groups, and VPC security groups.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2021-9999 Jacob Xi
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "\u5df2\u590d\u5236", "clipboard.copy": "\u590d\u5236", "search.result.more.one": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.more.other": "\u5728\u8be5\u9875\u4e0a\u8fd8\u6709 # \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.none": "\u6ca1\u6709\u627e\u5230\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.one": "\u627e\u5230 1 \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.other": "# \u4e2a\u7b26\u5408\u6761\u4ef6\u7684\u7ed3\u679c", "search.result.placeholder": "\u952e\u5165\u4ee5\u5f00\u59cb\u641c\u7d22", "search.result.term.missing": "\u7f3a\u5c11", "select.version": "\u9009\u62e9\u5f53\u524d\u7248\u672c"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.fc8c2696.min.js"></script>
+      
+    
+  </body>
+</html>
