@@ -41,6 +41,7 @@ nav:
     - '第三节 Aurora Basic Operation' : 'aurora/3Aurora_operation.md'
   - 'MySQL on K8S':
     - '第一节 Kubernetes 部署 MySQL 主从服务': 'chap_k8s/1Mysql_k8s.md'
+    - '第二节 在K8s中部署主从结构的MySQL服务': 'chap_k8s/2mysql_Master_slave.md'
   - 'MySQL 基础操作篇':
     - '第一节 数据库简介、及常用数据库介绍': 'db_ops/1db_intro.md'
     - '第二节 安装 MySQL Repository & Jam db install': 'db_ops/2db_install.md'
